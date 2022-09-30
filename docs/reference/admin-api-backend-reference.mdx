@@ -1,0 +1,141 @@
+---
+title: "Overview"
+---
+
+### GraphiQL IDE
+
+[You can utilise an interactive instance of the GraphQL API here.](https://api.usekana.com/graphql.)
+
+### SDKs
+
+We provide SDKs which make it easier for you to use the functionalities of the API in the languages that you use. Here's what's currently available:
+
+- [Node.js](https://github.com/usekana/admin-kana-js)
+
+You can install these SDKs like so:
+
+```javascript Node
+// CLI
+npm i @usekana/admin-kana-js
+
+// package.json - Ensure the following is present:
+"dependencies": {
+    "@usekana/admin-kana-js": "^0.1.14"
+}
+```
+
+### Endpoint
+
+The GraphQL API has a single endpoint which remains the same no matter what operation you perform:
+
+```
+https://api.usekana.com/graphql
+```
+
+### Authorization
+
+The Kana API uses API Keys to authenticate requests. You can view and manage your API Keys in the Kana dashboard. Your API Key must be present for all requests made, otherwise your requests will fail.
+
+<Tabs>
+
+<Tab title="cURL">
+
+Authentication to the API is performed via [Bearer Authentication](https://swagger.io/docs/specification/authentication/bearer-authentication/). Your API Key should be provided through an `Authorization` header (`-H "Authorization: INSERT_API_KEY"`). We do not require `Bearer` to precede the API Key.
+
+```bash
+curl https://api.usekana.com/graphql \
+
+-X POST \
+
+-H "Authorization: INSERT_API_KEY" \
+
+-d '{ "query": "mutation { createFeature(featureIdentifier: "seats-test", name: "Seats Test") { identifier name } }" }'
+```
+
+</Tab>
+
+<Tab title="Node">
+
+You'll need to initialize the KanaAdmin client with the API Key passed as an `apiKey` argument. The Node.js library will then automatically send this key in each request.
+
+```javascript
+import { KanaAdmin } from "@usekana/admin-kana-js";
+
+const kanaAdmin = new KanaAdmin({
+  apiKey: API_KEY, // Replace with own Private API Key
+});
+```
+
+</Tab>
+
+</Tabs>
+
+### HTTP Request Methods
+
+Our GraphQL API only supports POST HTTP requests - you will need to use POST as this enables you to include a JSON-encoded body for the query.
+
+### Formatting Queries
+
+When submitting a request outside of the GraphiQL IDE, the value of `query` in the JSON payload needs to be a string containing the GraphQL operation. Here's an example:
+
+```bash cURL
+cURL -d '{ "query": "mutation { createFeature(featureIdentifier: "seats", name: "Seats") { identifier } }" }'
+```
+
+### Errors
+
+We return errors under a different key and with a different type depending on if you’re querying the API directly (ie. cURL) or via one of our SDKs.
+
+<Note>
+**Note:** Remember that responses to these GraphQL API requests will return a 200 status so don’t take the response status as sacrosanct. You can access the true status within the `error.response.status` field for SDK requests.
+
+</Note>
+
+| Place         | Field    | Type                     |
+| ------------- | -------- | ------------------------ |
+| cURL / Direct | `errors` | Array                    |
+| SDKs          | `error`  | Object (Typed Exception) |
+
+#### Handling Errors
+
+You can provide the `onError` argument with an async function when initializing the client in order to globally take actions when errors occur. The following example logs all errors upon one occurring:
+
+```javascript Node.js
+const adminClient = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+    onError: async (err) => {
+        console.log(err);  // or push errors to a central logger
+    }
+});
+```
+
+If using Typescript, errors will be typed and you can check against this type. The following error types are possible:
+
+- `SubscriptionError`
+
+- `SubscriptionNotFoundError`
+
+- `PackageNotFoundError`
+
+- `FeatureNotFoundError`
+
+- `UserNotFoundError`
+
+- `AuthenticationError`
+
+- `NetworkError`
+
+- `Error `
+
+#### Retrying Upon Errors
+
+By default, we will retry sending all calls up to 2 times when a `NetworkError` occurs with no backoff or delay. You can override this behaviour with the `retry` argument:
+
+```javascript Node.js
+const adminClient = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+    retry: (error: Error, retryNumber: number) => {
+        return error instanceof NetworkError && retryNumber < 3;
+    }
+});
+```

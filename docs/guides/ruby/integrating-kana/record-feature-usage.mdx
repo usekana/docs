@@ -1,0 +1,111 @@
+---
+title: "Record Feature Usage"
+description: "When somebody uses a feature of your product, you're going to need to record this usage so that Kana can understand what and how much of a feature that a user has used."
+---
+
+<Note>
+This guide assumes that you have setup the client as we have in the [Setup](/guides/ruby/setup) instructions, and have initialized this to the `client` variable.
+
+</Note>
+
+## Grab details on the feature usage
+
+You will need to ensure you have details on both:
+
+- The **user** who has used the feature
+
+- The **feature** which the user has used
+
+Namely, you will need to have an identifier which maps to the `id` in Kana for both [Objects](/reference/admin-api-backend-reference/objects).
+
+<Note>
+Both the`id` for a [User](/reference/admin-api-backend-reference/objects#user) and a [Feature](/reference/admin-api-backend-reference/objects#feature) are defined by you upon creation in Kana.
+
+</Note>
+
+If neither the user nor feature exist yet in Kana, then you should create these first:
+
+[Create Users](/guides/ruby/importing-and-creating/create-users)
+
+[Create Features](/guides/ruby/importing-and-creating/create-features)
+
+We will work on the assumption that you have pulled the following user and have all the following details to hand:
+
+```ruby Ruby
+current_user = {
+  "id": 124,
+  "kana_id": "124",
+  "name": "Test User",
+  "email": "test@usekana.com"
+}
+
+feature = {
+  "id": "api-calls",
+  "name": "API Calls"
+}
+```
+
+## Send the request to Kana
+
+Now we can make the request to Kana in order to record a user's usage of a particular feature.
+
+We do this through the [createusageevent](/reference/admin-api-backend-reference/mutations#createusageevent) mutation. This requires three arguments:
+
+1. `userId` \- the `id` of the [User](/reference/admin-api-backend-reference/objects#user)
+
+2. `featureId` \- the `id` if the [Feature](/reference/admin-api-backend-reference/objects#feature)
+
+3. `delta` \- the amount of the feature that's been used as an [Integer](/reference/admin-api-backend-reference/scalars#int).
+
+<Note>
+**What format should the id arguments both be in?**
+
+We expect these `id` arguments to be [String's](/reference/admin-api-backend-reference/scalars#string) \- as this matches the `id` scalar type on the [User object](/reference/admin-api-backend-reference/objects#user) and [Feature object](/reference/admin-api-backend-reference/objects#feature) respectively. If any other field type is used, an error will occur telling you we can't accept any field type except String.
+
+</Note>
+
+We'll define these as variables to send alongside the query:
+
+```ruby Ruby
+usage_variables = {
+  "input": {
+    "userId": current_user[:kana_id],
+    "featureId": feature[:id],
+    "delta": 1
+  }
+}
+```
+
+Next, we have to define the query string for the mutation operation. This returns a boolean informing if the usage event was or not so no object fields are specified to be returned.
+
+```ruby Ruby
+usage_query = usage_query = "mutation createUsageEvent($input: CreateUsageEventInput!) {
+  createUsageEvent(input: $input)
+}"
+```
+
+We can now send the request to Kana in order to record the user's usage of the feature.
+
+<Note>
+  Make sure that this request is sent to Kana only upon the feature being
+  **successfully** used, when no more errors could occur preventing usage. This
+  will prevent discrepancies whereby feature usage has been recorded to Kana
+  despite the feature not actually having been used (ie. due to errors, etc).
+</Note>
+
+```ruby Ruby
+usage_response = client.execute(query: usage_query, variables: usage_variables)
+```
+
+<Check>
+**Congratulations** 🎉 You've now successfully recorded a feature's usage.
+
+We will return `true` if the usage event was successful. Feel free to use the response you get back to log the call, or raise any errors/retry the call if the request is not successful or returns `false` in the response.
+
+</Check>
+
+## Next Steps
+
+All of these usage events are recorded against a users [Entitlement](/reference/admin-api-backend-reference/objects#entitlement) and [Consumption](/reference/admin-api-backend-reference/objects#consumption) of a feature. This means that as they use a feature, we will reduce the amount they are now entitled to. Therefore, they may hit limits and you will need to restrict access to features when that happens. You can achieve this by identifying their current feature entitlement and imposing blocks where necessary:
+
+[Identify a User's Feature Entitlement](/guides/ruby/integrating-kana/identify-a-users-feature-entitlement)

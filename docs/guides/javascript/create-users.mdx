@@ -1,0 +1,86 @@
+---
+title: "Create Users"
+description: "Whenever a user signs up to your product, you will need to create that user in Kana so they can subscribe to packages and in turn access your product's features."
+---
+
+## How do I import users?
+
+You will have to either programmatically achieve this through the [createUser](/reference/admin-api-backend-reference/mutations#createuser) mutation or by importing the users in from Stripe.
+
+For the latter, we sync all Stripe customers to Kana users. When customers subscribe through Stripe to your Kana packages, we will also create new users in Kana if they don't exist.
+
+## Prerequisites
+
+There are no prerequisites - creating users is one of the first steps to take 🚀
+
+## Code Sample
+
+### Basic
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.users.create({id: '124', billingId: 'cus_883y74hdjjdjdnd', name: 'Test User', email: 'test@usekana.com'});
+console.log(data);
+console.log(error);
+```
+
+### Example
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js';
+
+const User = require('../app/models/user'); // Using Mongoose
+const { randomUUID } = require('crypto') // Generate userId
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+app.post('/signup', function(req, res, next) {
+  User.findOne({email: req.email}, function(err, user) {
+    if (err) {
+      res.send(err.message);
+    } else if (user) {
+        res.status(400).send('A user with that email already exists');
+    } else {
+        let newUser = new User();
+
+        newUser.id = randomUUID();
+        newUser.email = req.body.email;
+        newUser.name = req.body.name;
+
+        newUser.save(async function(err, user) {
+          const { data, error } = await client.users.create({
+            id: user.id
+            name: user.name
+            email: user.email
+          });
+
+          if (error) {
+            console.log(error)
+          };
+
+          if (data) {
+            console.log(data)
+          };
+        });
+    };
+  };
+});
+```
+
+## Next Steps
+
+<Check>
+  **Congratulations** 🎉 You've now successfully created users in Kana upon them
+  signing up for your product.
+</Check>
+
+These users can now be subscribed to the packages you have created in Kana. You can find out more on the ways you can subscribe your users to packages in the following guide.
+
+[Subscribe Users to Packages](/guides/javascript/subscribe-users-to-packages)

@@ -1,0 +1,81 @@
+---
+title: "Identify Users (Segment)"
+---
+
+Kana will create, update or merge users based on incoming [identify](https://segment.com/docs/connections/spec/identify/) events from Segment. This will allow you to sync users from your product or database into Kana with all information to best identify them.
+
+## Sending identify events to Kana
+
+You can send in identify events from any source in Segment. Different sources will require differently formatted payloads. [You can see a full list of sources here](https://segment.com/docs/connections/sources/catalog/).
+
+Here's an example using the Segment client-side Javascript library (Analytics JS):
+
+```javascript
+analytics.identify("userId123", {
+  name: "John Doe",
+  email: "john.doe@example.com",
+  billingUserId: "cus_Lp1bSKob4laHDD",
+});
+```
+
+We look for the following traits in identify events which map to [user fields in Kana](https://kana-1.gitbook.io/reference/admin-api-backend-reference/objects#user):
+
+| Segment Event Field    | Required?  | Description                                                                                                                     |
+| ---------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `userId`               | _Required_ | Maps to the `id` of a user in Kana. This is the external identifier of your user.                                               |
+| `traits.name`          | _Optional_ | Maps to the `name` of a user in Kana.                                                                                           |
+| `traits.email`         | _Optional_ | Maps to the `email` of a user in Kana.                                                                                          |
+| `traits.billingUserId` | _Optional_ | Maps to the `billingId` of a user in Kana. Must be the customer `id` for either Stripe or Chargebee as valid billing providers. |
+
+<Warning>
+All other traits will be dropped as they do not map to a field in Kana.
+
+</Warning>
+
+## Logic to create, update or merge
+
+We look at the `userId` and `email` to determine when to create, update or merge a user. The `userId` takes precedence as the canonical identifier. Kana allows for multiple users to have the same `email`.
+
+- **If a payload only comes in with a** **`userId`** **:** We will create a new user if that `userId` cannot be matched.
+
+- **If a payload comes in with a** **`userId`** **and** **`email`** **:** The following examples illustrate when a user will be created, updated or merged in Kana based on (1) what is sent in the Segment event payload, and (2) what users & which details are present in Kana:
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2FBscuWkzaK2JM1sDWpulS%2FScreenshot%202022-09-13%20at%2012.19.49.png?alt=media&token=0f6c54f8-05ce-4dc7-baf7-457b35b84606)
+
+### Users imported initially from Stripe
+
+Users which were initially imported from Stripe may have no `userId` but could have an `email`. Segment identify events will always have a `userId`. Therefore, **duplicate users could occur.**
+
+Kana will also try update or merge these users when Segment events come in with an `email` which matches (as can be seen in the diagram above). However, **in some cases we will not merge users**. The likelihood is that the payload contains the same email as multiple users and one of these was a Stripe import which has no `userId`.
+
+In both these cases, **we will flag these users to you in the dashboard.** You will be able to review and then merge these users in case it’s necessary. You can see more on this in the **Errors** section below.
+
+## Errors
+
+Two boxes will be present on the [Segment integration page](https://dashboard.usekana.com/integrations/segment/events) exposing any potential errors with users - (1) calling out users without a `billingId`, and (2) calling out users which have the same `email`.
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2F8gIGhNB59BZWeTVEYcvd%2FScreenshot%202022-09-13%20at%2014.19.41.png?alt=media&token=32e21176-9a2e-4684-8a45-1e4d1fa4cb05)
+
+### Not connected to billing provider
+
+This means that the user record has no `billingId`. If it is necessary for them to have one, or you suspect they might be duplicates, then you can import a CSV with the correct details for each user to resolve this. You can click _'View Users'_ to see all those users and import the CSV (under _'Import CSV'_)_._
+
+<Note>
+**How can I easily grab all users to fill in their data?**
+
+You have the ability to export a CSV (under _'Export CSV'_) on the same page. You can then reimport this same CSV once all correct details have been filled out. We will handle any creations, updates or merges needed.
+
+</Note>
+
+### Same email address
+
+This means that there's more than one user with the same email address. It could be intentional as Kana supports this, but it's flagged in case we were unable to merge users based on an incoming Segment payload whereby multiple users could match.
+
+You can click _'View users'_ to see those with the same emails and then select the users you wish to merge together.
+
+<Note>
+**Which user will the records be merged into?**
+
+We will merge into the user which was created first (ie. least recently). You cannot specify a user to merge into yet nor which fields will carry over. If this is something you need then let us know!
+
+</Note>

@@ -1,0 +1,32 @@
+---
+title: "Authorization Types"
+---
+
+## Description
+
+Our Client SDK will accept two methods of authorization:
+
+- **Simple Mode**
+
+- **Secure Mode**
+
+While Simple Mode requires no backend and is therefore super easy to setup, Secure Mode will ensure that only a given user's data can ever be loaded. Our Client SDK is read-only and no sensitive data is ever returned, but if you'd like that extra layer of security, this is the best method of authorization.
+
+<Note>
+There's no toggle to enforce that Secure Mode is used currently. You can easily use one method or the other depending on your use-case. If you ever need us to rotate your Public API Key, just let us know and we'll be happy to do so.
+
+</Note>
+
+Here's guides on how to achieve each:
+
+<Card
+  title="Simple Mode"
+  icon={regular("circle-play")}
+  href="/client-sdk-frontend/authorization-frontend/simple-mode"
+/>
+
+<Card
+  title="Secure Mode"
+  icon={regular("shield-keyhole")}
+  href="/client-sdk-frontend/authorization-frontend/secure-mode"
+/>

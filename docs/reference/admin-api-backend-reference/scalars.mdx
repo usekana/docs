@@ -1,0 +1,31 @@
+---
+title: "Scalars"
+---
+
+[Scalars](https://graphql.org/learn/schema/#scalar-types) are atomic values: `Int`, `String`, `Boolean`, `DateTime`, or `ID`.
+
+These act as the leaves of the query - whereby you must specify nested subfields until you return only scalars. You can see the [Objects](/reference/admin-api-backend-reference/objects) to understand which fields will resolve to scalar types.
+
+## Boolean
+
+Represents `true` or `false` values.
+
+## DateTime
+
+A date-time string at UTC ([ISO-8601](https://en.wikipedia.org/wiki/ISO%5F8601) encoded format).
+
+## ID
+
+Represents a unique identifier that is Base64 obfuscated. It is often used to refetch an object or as key for a cache. When expected as an input type, any string (such as `"VXNlci0xMA=="`) or integer (such as `4`) will be accepted as an input value for ID. Although the ID type appears in a JSON response as a String, it is not intended to be human-readable.
+
+## Int
+
+Represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.
+
+## String
+
+Represents textual data as UTF-8 character sequences. This type is most often used by GraphQL to represent free-form human-readable text.
+
+## JSON
+
+Represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).

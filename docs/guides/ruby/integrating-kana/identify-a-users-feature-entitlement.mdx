@@ -1,0 +1,235 @@
+---
+title: "Identify a User's Feature Entitlement"
+---
+
+Sometimes your users may not be allowed to access a particular feature because they aren't subscribed to a plan with that feature, or they have no further allowance of that feature remaining. You're going to want to identify if they are allowed to use a feature in order to **grant or block access**.
+
+<Note>
+  This guide assumes that you have setup the client as we have in the
+  [Setup](/guides/ruby/setup) instructions, and have initialized this to the
+  `client` variable.
+</Note>
+
+## Setup the call to Kana
+
+We're going to need to call Kana to identify if a user should have access to a certain feature. In order to do this, we're going to create a class. You can then utilise this class throughout your product whenever you need to identify a user's allowance of a particular feature.
+
+### Specify necessary attributes
+
+You will need to ensure you have an `id` for the following [Objects](/reference/admin-api-backend-reference/objects):
+
+- The [User](/reference/admin-api-backend-reference/objects#user) who is looking to use the feature.
+
+- The [Feature](/reference/admin-api-backend-reference/objects#feature) which the user is looking to use.
+
+<Note>
+  Both the`id` for a [User](/reference/admin-api-backend-reference/objects#user)
+  and a [Feature](/reference/admin-api-backend-reference/objects#feature) are
+  defined by you upon creation in Kana.
+</Note>
+
+You will also need to specify that the Kana Client (as setup in [Setup](/guides/ruby/setup)) should be passed in so that a call can be successfully made.
+
+The following `KanaFeatureEntitlement` class specifies these as instance variables that are set upon initialization of the object:
+
+```ruby Ruby
+class KanaFeatureEntitlement
+  def initialize(client, feature_id, user_id)
+    @client = client
+    @feature_id = feature_id
+    @user_id = user_id
+```
+
+### Define the query and variables
+
+We're going to make a [feature](/reference/admin-api-backend-reference/queries#feature) query operation to Kana in order to pull back details on the feature and [Entitlement](/reference/admin-api-backend-reference/objects#entitlement) of a user to that feature.
+
+In order to do so, we need to specify the query and the variables needed to successfully make that call. The `user_id` should map to `userId` and the `feature_id` should map to`id`.
+
+You can add the following in the same `initialize` method:
+
+```ruby Ruby
+sub_query = "query getFeatureEntitlement($id: String!, $userId: String!) {
+  feature(id: $id) {
+    type
+    entitlement(userId: $userId) {
+      access
+      consumption {
+        budget
+        used
+      }
+    }
+  }
+}"
+
+sub_variables = {
+  "userId": @user_id,
+  "id": @feature_id
+}
+```
+
+### Fetch the response and set details
+
+The call can then be made to Kana in order to fetch the response upon the class being initialized:
+
+```ruby Ruby
+# Sends the GraphQL request to Kana
+response = client.execute(query: sub_query, variables: sub_variables)
+```
+
+We can then grab the response details to set necessary instance variables immediately - such as the feature data and a user's entitlement data:
+
+```ruby Ruby
+  @feature = response['data']['feature']
+  @entitlement = @feature['entitlement']
+
+  if @entitlement['consumption'].present? # Dependant on 'activesupport' gem being installed
+    @budget = @entitlement['consumption']['budget']
+    @used = @entitlement['consumption']['used']
+  end
+end #Closes the initialize method
+```
+
+### Add methods to query feature usage and allowance
+
+The `KanaFeatureEntitlement` class is now setup to be successfully instantiated and initialized - however, we still need to specify methods which will help you understand your users feature allowance.
+
+These methods will use the data we have pulled from Kana, now set in the associated instance variables.
+
+```ruby Ruby
+def can_use_feature?(amount = 1)
+    if consumable?
+      has_access? && amount_remaining >= amount
+    else
+      has_access?
+    end
+  end
+
+  def amount_remaining
+    @budget - @used
+  end
+
+  def binary?
+    @feature['type'] == "BINARY"
+  end
+
+  def consumable?
+    @feature['type'] == "CONSUMABLE"
+  end
+
+  def has_access?
+    @entitlement['access']
+  end
+
+  def budget
+    @budget
+  end
+
+  def used
+    @used
+  end
+end #Closes class definition
+```
+
+Here's more on each one below:
+
+| Method Name        | Type    | Description                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `can_use_feature?` | Boolean | Returns if the user should be able to use the feature. Considers both access to the feature through plan subscription, plus the remaining amount of the feature that a user can use if the feature is consumable. Takes an integer argument of `amount` which specifies how much of the feature the user is trying to use. Defaults to `1` if none is provided. |
+| `amount_remaining` | Integer | Returns how much of the feature that the user has remaining **before** it's been used.                                                                                                                                                                                                                                                                          |
+| `binary?`          | Boolean | Returns if the feature is binary or not.                                                                                                                                                                                                                                                                                                                        |
+| `consumable?`      | Boolean | Returns if the feature is consumable or not.                                                                                                                                                                                                                                                                                                                    |
+| `has_access?`      | Boolean | Returns if the user has access to the feature or not through their subscription. Does not consider the amounts used or remaining.                                                                                                                                                                                                                               |
+| `budget`           | Integer | Returns how much of the feature a                                                                                                                                                                                                                                                                                                                               |
+| `used`             | Integer | Returns how much of the feature has already been used.                                                                                                                                                                                                                                                                                                          |
+
+Not all of these methods may be pertinent to your use-case so feel free to remove those you don't need to know. Likewise, feel free to add methods within the class which would be of benefit to you.
+
+<Check>
+  **The class is now setup to use** 🎉 Not all of this information returned by
+  the methods may be pertinent to your use-case so feel free to remove those
+  methods you don't need. Likewise, feel free to add methods within the class
+  which would be of benefit to you.
+</Check>
+
+## Make the call to Kana
+
+You can now use this class in order to understand a users entitlement to a feature where it's necessary to do so in your code.
+
+Firstly, you'll need to pull the user who's going to be using the feature. We'll assume this is available like so:
+
+```ruby Ruby
+current_user = {
+  "id": 124,
+  "kana_id": "124",
+  "name": "Test User",
+  "email": "test@usekana.com"
+}
+```
+
+Then you can initialize the `KanaFeatureEntitlement` object which we setup earlier. You'll need to provide the arguments we defined previously for the `initialize` method:
+
+- `client`: The client needed to make the API Call that you would have initialized previously (more in [Setup](/guides/ruby/setup)).
+
+- `feature_id`: The id of the feature. You can grab this from Kana, or note it somewhere from when the feature was created in Kana.
+
+- `user_id`: The id of the user. This can be taken from the pulled user.
+
+We'll tie this to a variable named `user_entitlement`.
+
+```ruby Ruby
+user_entitlement = KanaFeatureEntitlement.new(client, 'api-calls', current_user[:kana_id])
+```
+
+Once this is run, the call to Kana will have been made and we can use the methods we defined on `user_entitlement` to fetch the information we need.
+
+<Note>
+  Remember that you should be calling these methods **before a feature is
+  actually used or accessed** as to check if you should be granting access to
+  that feature.
+</Note>
+
+Here's all the potential methods (which we're logging to the console in the example):
+
+```ruby Ruby
+puts user_entitlement.can_use_feature? #true
+puts user_entitlement.amount_remaining #1
+puts user_entitlement.binary? #false
+puts user_entitlement.consumable? #true
+puts user_entitlement.has_access? #true
+puts user_entitlement.budget #50
+puts user_entitlement.used #49
+```
+
+## Grant or block access to a feature
+
+You are now able to verify if your user has entitlement to a feature and can therefore block access to this feature if they do not.
+
+One way to do this is to raise and rescue an error. Our example below, for instance, raises a custom `FeatureEntitlementError` if `user_entitlement.can_use_feature?` returns `false`.
+
+<Note>
+Note how the example below passes in an argument to the `can_use_feature?` method. This represents the **amount** of the feature which is to be used. If the feature has a [type](/reference/admin-api-backend-reference/enums#featuretype) of `BINARY`, it's not utilised. However, if it's `CONSUMABLE`, then we will check this amount against the amount which the user has remaining of this feature on their plan. More on this method was shown earlier in [Add methods to query feature usage and allowance](/guides/ruby/integrating-kana/identify-a-users-feature-entitlement#add-methods-to-query-feature-usage-and-allowance).
+
+</Note>
+
+```ruby Ruby
+# Custom error class definition
+class FeatureEntitlementError < StandardError; end
+
+# Raises error if no entitlement for user to use feature
+raise FeatureEntitlementError unless user_entitlement.can_use_feature?(2)
+
+# Example for a Rails controller whereby this error is rescued and returns JSON for error message
+rescue_from FeatureEntitlementError, with: :no_feature_entitlement
+
+private def no_feature_entitlement
+  render json: { error: { message: "You cannot access or use this feature as you are either not subscribed to a plan or have no remaining allowance. Upgrade your package to gain access." }, status: :forbidden }
+end
+```
+
+<Check>
+**Congratulations** 🎉 You've now successfully checked a users feature allowance and blocked them from using the feature if they should have no access.
+
+Feel free to use the response you get back to store any returned fields of use to your records, log the call, or raise any errors if the call is not successful.
+
+</Check>

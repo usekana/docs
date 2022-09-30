@@ -1,0 +1,124 @@
+---
+title: "Inputs"
+---
+
+[Inputs](https://graphql.org/learn/schema/#input-types) are used as arguments for your mutation operations. They are a type of object which define a set of fields, which in turn can either be [Scalars](/reference/admin-api-backend-reference/scalars), [Enums](/reference/admin-api-backend-reference/enums), or other input objects.
+
+## CreateUserInput
+
+### Fields
+
+| Name      | Type                                                             | String                                                                                                                                                                 |
+| --------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| id        | [String!](/reference/admin-api-backend-reference/scalars#string) | The id which you want to assign to identify the user.                                                                                                                  |
+| billingId | [String](/reference/admin-api-backend-reference/scalars#string)  | The id of the user which identifies them to be charged for their subscriptions. This will often be the id given by your payment provider (ie. Stripe, Chargebee, etc). |
+| name      | [String](/reference/admin-api-backend-reference/scalars#string)  | The name of the user.                                                                                                                                                  |
+| email     | [String](/reference/admin-api-backend-reference/scalars#string)  | The email of the user.                                                                                                                                                 |
+| metadata  | [JSON](/reference/admin-api-backend-reference/scalars#json)      | Attach any key-value data that would be useful to store on the [User](/reference/admin-api-backend-reference/objects#user) object.                                     |
+
+## UpdateUserInput
+
+<Note>
+**How can I update the email or billingId of a user?**
+
+You will need to do this through a CSV Import within our [Dashboard](https://dashboard.usekana.com). We'll soon make this possible through the API.
+
+</Note>
+
+### Fields
+
+| Name     | Type                                                             | String                                                                                                                             |
+| -------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| id       | [String!](/reference/admin-api-backend-reference/scalars#string) | The new id which you want to assign to identify the user.                                                                          |
+| name     | [String](/reference/admin-api-backend-reference/scalars#string)  | The name of the user.                                                                                                              |
+| metadata | [JSON](/reference/admin-api-backend-reference/scalars#json)      | Attach any key-value data that would be useful to store on the [User](/reference/admin-api-backend-reference/objects#user) object. |
+
+## CreateUsageEventInput
+
+### Fields
+
+| Name      | Type                                                                                | String                                                                                                                                                                                                                                                                                                  |
+| --------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| userId    | [String!](/reference/admin-api-backend-reference/scalars#string)                    | The id of the user who used the feature. This maps to the `id` field as set on the [User](/reference/admin-api-backend-reference/objects#user) object.                                                                                                                                                  |
+| featureId | [String!](/reference/admin-api-backend-reference/scalars#string)                    | The id of the feature which was used by the user. This maps to the `id` field as set on the [Feature](/reference/admin-api-backend-reference/objects#feature) object.                                                                                                                                   |
+| delta     | [Int](/reference/admin-api-backend-reference/scalars#int)                           | The amount by which the feature was used. This will impact the [Entitlement](/reference/admin-api-backend-reference/objects#entitlement) a user has for a feature, by updating the `used` field in the [Consumption](/reference/admin-api-backend-reference/objects#consumption)model. Defaults to `1`. |
+| action    | [RecordUsageAction](/reference/admin-api-backend-reference/enums#recordusageaction) | Specify how you want the usage of the feature to be recorded. Can be `ADD` (to add to existing usage amount) or `SET` (to override the existing usage amount). Defaults to `ADD`.                                                                                                                       |
+
+## CreateFeatureInput
+
+### Fields
+
+| Name            | Type                                                                     | String                                                                                                                                   |
+| --------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| id              | [String!](/reference/admin-api-backend-reference/scalars#string)         | The id which you want to assign to identify the feature.                                                                                 |
+| name            | [String](/reference/admin-api-backend-reference/scalars#string)          | The name of the feature.                                                                                                                 |
+| type            | [FeatureType!](/reference/admin-api-backend-reference/enums#featuretype) | The type of the feature. Either `BINARY` or `CONSUMABLE`.                                                                                |
+| unitLabel       | [String](/reference/admin-api-backend-reference/scalars#string)          | The name of the consumable unit (eg. _Message_, _API Call_, etc). Only necessary if `type` is `CONSUMABLE`.                              |
+| unitLabelPlural | [String](/reference/admin-api-backend-reference/scalars#string)          | The pluralised name of the consumable unit (eg. _Messages_, _API Calls_, etc). Only necessary if `type` is `CONSUMABLE`.                 |
+| metadata        | [JSON](/reference/admin-api-backend-reference/scalars#json)              | Attach any key-value data that would be useful to store on the [Feature](/reference/admin-api-backend-reference/objects#feature) object. |
+
+## UpdateFeatureInput
+
+<Note>
+**How do I update the type of feature?**
+
+It is not possible to update the type of feature once it has been initially set. You would need to create a new feature altogether.
+
+</Note>
+
+### Fields
+
+| Name            | Type                                                            | String                                                                                                                                   |
+| --------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| name            | [String](/reference/admin-api-backend-reference/scalars#string) | The name of the feature.                                                                                                                 |
+| unitLabel       | [String](/reference/admin-api-backend-reference/scalars#string) | The name of the consumable unit (eg. _Message_, _API Call_, etc). Only necessary if `type` is `CONSUMABLE`.                              |
+| unitLabelPlural | [String](/reference/admin-api-backend-reference/scalars#string) | The pluralised name of the consumable unit (eg. _Messages_, _API Calls_, etc). Only necessary if `type` is `CONSUMABLE`.                 |
+| metadata        | [JSON](/reference/admin-api-backend-reference/scalars#json)     | Attach any key-value data that would be useful to store on the [Feature](/reference/admin-api-backend-reference/objects#feature) object. |
+
+## CreatePackageInput
+
+**How do I add prices to my packages and/or features within?**
+
+You will currently need to use the [Dashboard](https://dashboard.usekana.com) to add any billing templates and prices to packages and respective features within. We are currently looking into how to best achieve this through the API.
+
+### Fields
+
+| Name     | Type                                                                                                       | String                                                                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| id       | [String!](/reference/admin-api-backend-reference/scalars#string)                                           | The id which you want to assign to identify the package.                                                                                 |
+| name     | [String](/reference/admin-api-backend-reference/scalars#string)                                            | The name of the package.                                                                                                                 |
+| isAddon  | [Boolean](/reference/admin-api-backend-reference/scalars#boolean)                                          | Represents whether the package is an add-on (`true`) or a base package (`false`). Defaults to `false`.                                   |
+| features | [\[CreatePackageFeatureInput!\]!](/reference/admin-api-backend-reference/inputs#createpackagefeatureinput) | A list of the features which will be added to the package.                                                                               |
+| metadata | [JSON](/reference/admin-api-backend-reference/scalars#json)                                                | Attach any key-value data that would be useful to store on the [Package](/reference/admin-api-backend-reference/objects#package) object. |
+
+## CreatePackageFeatureInput
+
+### Fields
+
+| Name        | Type                                                                                          | String                                                                                                                           |
+| ----------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| id          | [String!](/reference/admin-api-backend-reference/scalars#string)                              | The id of the[Feature](/reference/admin-api-backend-reference/objects#feature) which you want to add to the package.             |
+| entitlement | [EntitlementInput](/reference/admin-api-backend-reference/inputs#createpackagefeatureinput-1) | The entitlement which a user would have for this consumable feature. Only necessary if the feature has a `type` of `CONSUMABLE`. |
+
+## EntitlementInput
+
+### Fields
+
+| Name           | Type                                                                     | String                                                                                                                                   |
+| -------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| limit          | [Int](/reference/admin-api-backend-reference/scalars#int)                | Indicates the amount of the feature given to the user (ie. `“500”`). If not provided, the amount will be unlimited.                      |
+| resetPeriod    | [ResetPeriod!](/reference/admin-api-backend-reference/enums#resetperiod) | Indicates the period by which the limit will reset (ie. `MONTH`).                                                                        |
+| overageEnabled | [Boolean](/reference/admin-api-backend-reference/scalars#boolean)        | Flags whether a user can run over the limit (`true`) or if it should be a hard limit that prevents usage (`false`). Defaults to `false`. |
+
+## UpdatePackageInput
+
+<Note>
+For larger changes beyond adding metadata, you should use the [Dashboard](https://dashboard.usekana.com) to update existing packages. We are currently looking into how to best achieve this through the API.
+
+</Note>
+
+### Fields
+
+| Name     | Type                                                        | String                                                                                                                                   |
+| -------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| metadata | [JSON](/reference/admin-api-backend-reference/scalars#json) | Attach any key-value data that would be useful to store on the [Package](/reference/admin-api-backend-reference/objects#package) object. |

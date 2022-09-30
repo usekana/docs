@@ -1,0 +1,189 @@
+---
+title: "Client SDK (Frontend) Reference"
+---
+
+## Authorization
+
+You'll need to fetch a `userToken` and provide this when initializing the Kana JS Client instance in order for calls to be successfully made. We have a handy guide which goes into further detail on how to obtain and provide this.
+
+[Authorization (Frontend)](/client-sdk-frontend/authorization-frontend)
+
+## Errors
+
+We return errors within the `error` field of a request. You can use the following to assign the relevant fields to a `data` or `error` variable and check against them to understand if problems occurred or if data was returned:
+
+```javascript
+const { data, error } = await userClient.canUseFeature("test-feature-id");
+```
+
+You can then decide to handle these however you feel is necessary.
+
+### Handling
+
+You can provide the `onError` argument with an async function when initializing the client in order to globally take actions when errors occur. The following example logs all errors upon one occurring:
+
+```javascript
+const userClient = new KanaUserClient({
+  userToken,
+
+  onError: async (err) => {
+    console.log(err); // or push errors to a central logger
+  },
+});
+```
+
+If using Typescript, errors will be typed and you can check against this type. The following error types are possible:
+
+- `EmptyArgumentError`
+
+- `FeatureNotFoundError`
+
+- `AuthenticationError`
+
+- `NetworkError`
+
+- `Error `
+
+### Retries
+
+By default, we will retry sending all calls up to 2 times when a `NetworkError` occurs with no backoff or delay. You can override this behaviour with the `retry` argument:
+
+```javascript
+const userClient = new KanaUserClient({
+  userToken,
+
+  retry: (error: Error, retryNumber: number) => {
+    return error instanceof NetworkError && retryNumber < 3;
+  },
+});
+```
+
+## Methods
+
+### canUseFeature(featureId, delta?)
+
+Understand if a [User](/reference/admin-api-backend-reference/objects#user) is able to use a particular [Feature](/reference/admin-api-backend-reference/objects#feature).
+
+The returned `access` boolean is `true` when the user has access (for Binary features), has enough of a feature remaining to be used (for Consumable features), or has overage enabled (for Consumable features).
+
+#### Arguments
+
+| Field       | Type                                                             | Text                                                                                                                                       |
+| ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `featureId` | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the feature. This maps to the `id` field as set on the [Feature](/reference/admin-api-backend-reference/objects#feature) object. |
+| `delta`     | [Int](/reference/admin-api-backend-reference/scalars#int)        | The amount of the consumable feature which the user will be using and you want to check access against. Defaults to `1`.                   |
+
+#### Returns
+
+A `Promise` that resolves to a [CanUseFeatureData](/reference/admin-api-backend-reference/objects#canusefeaturedata) object.
+
+#### Example
+
+```javascript JS
+// Initializing the client
+import { KanaUserClient } from "@usekana/client-kana-js";
+
+const userToken = "<INSERT_USER_TOKEN_HERE>";
+const kanaClient = new KanaUserClient({ userToken });
+
+// Using the method
+const { data, error } = await kanaClient.canUseFeature("messages", 1);
+console.log(data);
+console.log(error);
+```
+
+### getSubscribedFeatures()
+
+Lists the [Feature](/reference/admin-api-backend-reference/objects#feature)**s** which a [User](/reference/admin-api-backend-reference/objects#user) has access to.
+
+#### Returns
+
+A `Promise` that resolves to an array of [Feature](/reference/admin-api-backend-reference/objects#feature) objects with only the following fields present:
+
+- `id`
+
+- `name`
+
+- `type`
+
+- `unitLabel`
+
+- `unitLabelPlural`
+
+- `metadata`
+
+#### Example
+
+```javascript
+// Initializing the client
+
+import { KanaUserClient } from "@usekana/client-kana-js";
+
+const userToken = "<INSERT_USER_TOKEN_HERE>";
+
+const kanaClient = new KanaUserClient({ userToken });
+
+// Using the method
+
+const { data, error } = await kanaClient.getSubscribedFeatures();
+
+console.log(data);
+
+console.log(error);
+```
+
+### getSubscribedPackages()
+
+Lists the plans which a user is subscribed to.
+
+#### Returns
+
+A `Promise` that resolves to an array of [Package](/reference/admin-api-backend-reference/objects#package) objects with only the following fields present:
+
+- `id`
+
+- `name`
+
+- `isAddon`
+
+- `metadata`
+
+#### Example
+
+```javascript
+// Initializing the client
+
+import { KanaUserClient } from "@usekana/client-kana-js";
+
+const userToken = "<INSERT_USER_TOKEN_HERE>";
+const kanaClient = new KanaUserClient({ userToken });
+
+// Using the method
+const { data, error } = await kanaClient.getSubscribedPackages();
+console.log(data);
+console.log(error);
+```
+
+### resetCache()
+
+Resets a user's data which has been stored in the cache.
+
+By default, the SDK uses the cache to store a user's subscribed packages and features upon initially calling any method. This cached data will then be returned when calling any method subsequently. You will need to call `resetCache()` in order to refresh this data.
+
+#### Returns
+
+A `Promise` that resolves to an empty object if the cache has been successfully reset.
+
+#### Examples
+
+```javascript
+// Initializing the client
+
+import { KanaUserClient } from "@usekana/client-kana-js";
+
+const userToken = "<INSERT_USER_TOKEN_HERE>";
+const kanaClient = new KanaUserClient({ userToken });
+
+// Using the method
+await kanaClient.resetCache();
+```

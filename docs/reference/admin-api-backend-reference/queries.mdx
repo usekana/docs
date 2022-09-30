@@ -1,0 +1,1246 @@
+---
+title: "Queries"
+---
+
+[Queries](https://graphql.org/learn/queries/#fields) define GraphQL operations which retrieve data from the server. They return only the data you specify, based on the fields which you provide in a query. If an [object](/reference/admin-api-backend-reference/objects) is returned, then you must specify the fields of that object which you want to return. The final result of the query must only return [scalars](https://docs.github.com/en/graphql/reference/scalars).
+
+At the start of every query operation, ensure that you specify `query` before the field(s).
+
+<Note>
+**Query Variables**
+
+We use variables throughout our example requests. We do this in order to mirror real-world application practices whereby you would most likely want dynamic values for your arguments. [Take a look at this guide if you're unfamiliar with how variables work in GraphQL](https://graphql.org/learn/queries/#variables).
+
+</Note>
+
+## feature
+
+Retrieve a [Feature](/reference/admin-api-backend-reference/objects#feature).
+
+### Arguments
+
+| Name | Type                                                             | Description                                                                                                                                |
+| ---- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id` | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the feature. This maps to the `id` field as set on the [Feature](/reference/admin-api-backend-reference/objects#feature) object. |
+
+### Returns
+
+| Name               | Type                                                                   | Description                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `data`             | [**Feature!**](/reference/admin-api-backend-reference/objects#feature) | The [Feature](/reference/admin-api-backend-reference/objects#feature) corresponding to the `id` you passed. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)            | Returns any errors which may have occurred with the request.                                                |
+
+### Examples
+
+<Tabs>
+
+<Tab title="Request/Response">
+#### Request Body
+
+```javascript
+query canUseFeature($userId: String!, $featureId: String!, $delta: Int) {
+  canUseFeature(userId: $userId, featureId: $featureId, delta: $delta) {
+    data {
+      access
+      reason
+      consumption {
+        budget
+        used
+        overageEnabled
+      }
+    }
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "userId": "124",
+  "featureId": "api-calls",
+  "delta": 1
+}
+```
+
+#### Response Body
+
+```json
+{
+  "data": {
+    "canUseFeature": {
+      "access": true,
+      "reason": "The user has a subcription to a package with this consumable feature and either has an allowance remaining or overage is enabled.",
+      "consumption": {
+        "used": 0,
+        "budget": 50,
+        "overageEnabled": false
+      }
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query canUseFeature($userId: String!, $featureId: String!, $delta: Int) { canUseFeature(userId: $userId, featureId: $featureId, delta: $delta) { access reason consumption { budget used overageEnabled } } }", "variables": "{ \"userId\": \"124\", \"featureId\": \"api-calls\", \"delta\": 1 }" }'
+```
+
+</Tab>
+
+<Tab title="Node.js">
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.features.canUse({userId: '124', featureId: 'api-calls', delta: 1});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## features
+
+List all [Features](/reference/admin-api-backend-reference/objects#feature).
+
+### Returns
+
+| Name               | Type                                                                    | Description                                                  |
+| ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `data`             | [\[Feature!\]!](/reference/admin-api-backend-reference/objects#feature) | An array of all features.                                    |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)             | Returns any errors which may have occurred with the request. |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query listFeatures {
+  features {
+    id
+    name
+    type
+    unitLabel
+    unitLabelPlural
+    metadata
+    packages {
+      id
+      name
+      status
+      metadata
+      isAddon
+      updatedAt
+    }
+  }
+}
+```
+
+**Response Body**
+
+```json
+{
+  "data": {
+    "features": [
+      {
+        "id": "api-calls",
+        "name": "API Calls",
+        "type": "CONSUMABLE",
+        "unitLabel": "API Call",
+        "unitLabelPlural": "API Calls",
+        "metadata": {},
+        "packages": [
+          {
+            "id": "pro-plan",
+            "name": "Pro Plan",
+            "status": "PUBLISHED",
+            "metadata": {},
+            "isAddon": false,
+            "updatedAt": "2022-01-21T16:08:09.640Z"
+          }
+        ]
+      },
+      {
+        "id": "messages",
+        "name": "Messages",
+        "type": "CONSUMABLE",
+        "unitLabel": "Message",
+        "unitLabelPlural": "Messages",
+        "metadata": {},
+        "packages": [
+          {
+            "id": "free-plan",
+            "name": "Free Plan",
+            "status": "PUBLISHED",
+            "metadata": {},
+            "isAddon": false,
+            "updatedAt": "2022-01-21T16:08:09.640Z"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: {API_KEY}" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query listFeatures { features { id name type unitLabel unitLabelPlural metadata packages { id name metadata isAddon updatedAt } } }"}'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: {API_KEY}
+});
+
+const { data, error } = await client.features.list();
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## canUseFeature
+
+Understand if a [User](/reference/admin-api-backend-reference/objects#user) is able to use a particular [Feature](/reference/admin-api-backend-reference/objects#feature).
+
+The returned `access` boolean is `true` when the user has access (for Binary features), has enough of a feature remaining to be used (for Consumable features), or has overage enabled (for Consumable features).
+
+### Arguments
+
+| Name        | Type                                                             | Description                                                                                                                                |
+| ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `featureId` | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the feature. This maps to the `id` field as set on the [Feature](/reference/admin-api-backend-reference/objects#feature) object. |
+| `userId`    | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the user. This maps to the `id` field as set on the [User](/reference/admin-api-backend-reference/objects#user) object.          |
+| `delta`     | [Int](/reference/admin-api-backend-reference/scalars#int)        | The amount of the consumable feature which the user will be using and you want to check access against. Defaults to `1`.                   |
+
+### Returns
+
+| Name               | Type                                                                                   | Description                                                                                                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`             | [CanUseFeatureData!](/reference/admin-api-backend-reference/objects#canusefeaturedata) | An object containing details on if the user can use the feature (`access`, `reason`) and on a user’s current [Consumption](/reference/admin-api-backend-reference/objects#consumption) of the feature (`consumption`). |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)                            | Returns any errors which may have occurred with the request.                                                                                                                                                           |
+
+### Examples
+
+<Tabs>
+
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query canUseFeature($userId: String!, $featureId: String!, $delta: Int) {
+  canUseFeature(userId: $userId, featureId: $featureId, delta: $delta) {
+    data {
+      access
+      reason
+      consumption {
+        budget
+        used
+        overageEnabled
+      }
+    }
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "userId": "124",
+  "featureId": "api-calls",
+  "delta": 1
+}
+```
+
+**Response Body**
+
+```json
+{
+  "data": {
+    "canUseFeature": {
+      "access": true,
+      "reason": "The user has a subcription to a package with this consumable feature and either has an allowance remaining or overage is enabled.",
+      "consumption": {
+        "used": 0,
+        "budget": 50,
+        "overageEnabled": false
+      }
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query canUseFeature($userId: String!, $featureId: String!, $delta: Int) { canUseFeature(userId: $userId, featureId: $featureId, delta: $delta) { access reason consumption { budget used overageEnabled } } }", "variables": "{ \"userId\": \"124\", \"featureId\": \"api-calls\", \"delta\": 1 }" }'
+```
+
+</Tab>
+
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.features.canUse({userId: '124', featureId: 'api-calls', delta: 1});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## showUsage
+
+Retrieve both the current and historical usage of a [Feature](/reference/admin-api-backend-reference/objects#feature) for a [User](/reference/admin-api-backend-reference/objects#user).
+
+<Note>
+**Why can I only see the current usage through the SDKs?**
+
+We're in the process of returning past usage of a feature via our SDKs. Let us know if you'd love to see it and we'll keep you posted on when it's launched!
+
+</Note>
+
+### Arguments
+
+| Name        | Type                                                             | Description                                                                                                                                |
+| ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `userId`    | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the user. This maps to the `id` field as set on the [User](/reference/admin-api-backend-reference/objects#user) object.          |
+| `featureId` | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the feature. This maps to the `id` field as set on the [Feature](/reference/admin-api-backend-reference/objects#feature) object. |
+
+### Returns
+
+| Name               | Type                                                                           | Description                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `data`             | [ShowUsageData!](/reference/admin-api-backend-reference/objects#showusagedata) | An object containing details on the how many of the feature a user has used (`usages`) and since when (`since`). |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)                    | Returns any errors which may have occurred with the request.                                                     |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query showUsage($userId: String!, $featureId: String!) {
+  showUsage(userId: $userId, featureId: $featureId) {
+    current {
+      periodStart
+      periodEnd
+      consumption {
+        used
+        budget
+        overageEnabled
+      }
+    }
+    past {
+      periodStart
+      periodEnd
+      consumption {
+        used
+        budget
+        overageEnabled
+      }
+    }
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "userId": "124",
+  "featureId": "api-calls"
+}
+```
+
+**Response Body**
+
+```json
+{
+  "data": {
+    "showUsage": {
+      "current": {
+        "periodStart": "2022-08-10T15:07:01.803Z",
+        "periodEnd": "2022-09-10T15:07:01.803Z",
+        "consumption": {
+          "used": 0,
+          "budget": 50,
+          "overageEnabled": false
+        }
+      },
+      "past": [
+        {
+          "periodStart": "2022-07-10T15:07:01.803Z",
+          "periodEnd": "2022-08-10T15:07:01.803Z",
+          "consumption": {
+            "used": 48,
+            "budget": 50,
+            "overageEnabled": false
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query showUsage($userId: String!, $featureId: String!) { showUsage(userId: $userId, featureId: $featureId) { current { periodStart periodEnd consumption { used budget overageEnabled } } past { periodStart periodEnd consumption { used budget overageEnabled } } } }", "variables": "{ \"userId\": \"124\", \"featureId\": \"api-calls\" }" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.features.showUsage({userId: '124', featureId: 'api-calls'});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## package
+
+Retrieve a [Package](/reference/admin-api-backend-reference/objects#package).
+
+### Arguments
+
+| Name              | Type                                                              | Description                                                                                                                                |
+| ----------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`              | [String!](/reference/admin-api-backend-reference/scalars#string)  | The id of the package. This maps to the `id` field as set on the [Package](/reference/admin-api-backend-reference/objects#package) object. |
+| `includeFeatures` | [Boolean](/reference/admin-api-backend-reference/scalars#boolean) | _**SDK Only**_. Whether you want a `features` array to be present as part of the response. Defaults to `false`.                            |
+
+### Returns
+
+| Name               | Type                                                               | Description                                                                                                 |
+| ------------------ | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `data`             | [Package!](/reference/admin-api-backend-reference/objects#package) | The [Package](/reference/admin-api-backend-reference/objects#package) corresponding to the `id` you passed. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)        | Returns any errors which may have occurred with the request.                                                |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query retrievePackage($id: String!) {
+  package(id: $id) {
+    id
+    name
+    status
+    metadata
+    features {
+      id
+      name
+      limit
+      type
+      unitLabel
+      unitLabelPlural
+      metadata
+    }
+    prices {
+      id
+      provider
+      amount
+      displayAmount
+      currency
+      interval
+    }
+    isAddon
+    updatedAt
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "id": "pro-plan"
+}
+```
+
+**Response Body**
+
+```json
+{
+  "data": {
+    "package": {
+      "id": "pro-plan",
+      "name": "Pro Plan",
+      "status": "PUBLISHED",
+      "metadata": {},
+      "features": [
+        {
+          "id": "api-calls",
+          "name": "API Calls",
+          "limit": "1000",
+          "type": "CONSUMABLE",
+          "unitLabel": "API Call",
+          "unitLabelPlural": "API Calls",
+          "metadata": {}
+        }
+      ],
+      "prices": [
+        {
+          "id": "price_1L7NHvIiEnRX8aivoxbSWREF",
+          "provider": "STRIPE",
+          "amount": 5000,
+          "displayAmount": "50.00",
+          "currency": "gbp",
+          "interval": "month"
+        }
+      ],
+      "isAddon": false,
+      "updatedAt": "2021-11-25T16:57:42.778Z"
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query retirevePackage($id: String!, $includeFeatures: Boolean) { package(id: $id, includeFeatures: $includeFeatures) { id name status metadata features { id name limit type unitLabel unitLabelPlural metadata } prices { id provider amount displayAmount currency interval } isAddon updatedAt } }", "variables": "{ \"id\": \"pro-plan\", \"includeFeatures\": true }" }'
+```
+
+</Tab>
+
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.packages.retrieve({id: "pro-plan"});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## packages
+
+List all [Packages](/reference/admin-api-backend-reference/objects#package).
+
+### Arguments
+
+| Name              | Type                                                              | Description                                                                                                                                                      |
+| ----------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`          | [String](/reference/admin-api-backend-reference/scalars#string)   | The status of the package. Maps to one of the [PackageStatus](/reference/admin-api-backend-reference/enums#packagestatus) enum options. Defaults to `PUBLISHED`. |
+| `includeFeatures` | [Boolean](/reference/admin-api-backend-reference/scalars#boolean) | _**SDK Only**_. Whether you want a `features` array to be present as part of the response. Defaults to `false`.                                                  |
+
+### Returns
+
+| Name               | Type                                                                    | Description                                                  |
+| ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `data`             | [\[Package!\]!](/reference/admin-api-backend-reference/objects#package) | An array of all packages.                                    |
+| `errors` / `error` | See[Errors](/reference/admin-api-backend-reference#errors)              | Returns any errors which may have occurred with the request. |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query listPackages($status: String!) {
+  package(status: $status) {
+    data {
+      id
+      name
+      status
+      metadata
+      features {
+        id
+        name
+        limit
+        type
+        unitLabel
+        unitLabelPlural
+        metadata
+      }
+      prices {
+        id
+        provider
+        amount
+        displayAmount
+        currency
+        interval
+      }
+      isAddon
+      updatedAt
+    }
+  }
+}
+```
+
+---
+
+#### Request Query Variables
+
+```json
+{
+  "status": "PUBLISHED"
+}
+```
+
+**Response Body**
+
+```json
+{
+  "data":{
+    "packages":[
+      {
+        "id":"free-plan",
+        "name":"Free Plan",
+        "status":"PUBLISHED",
+        "features":[
+          {
+            "id":"api-calls",
+            "name":"API Calls",
+            "limit":"1000",
+            "type":"CONSUMABLE"
+            "unitLabel": "API Call",
+            "unitLabelPlural": "API Calls",
+            "metadata": {},
+          }
+        ],
+        "prices":[
+          {
+            "id": "price_1L7NHvIiEnRX8aivoxbSWREF",
+            "provider": "STRIPE",
+            "amount": 5000,
+            "displayAmount": "50.00",
+            "currency": "gbp",
+            "interval": "month"
+          }
+        ],
+        "isAddon":false,
+        "updatedAt":"2021-11-25T16:57:42.778Z"
+      },
+      {
+        "id":"premium-plan",
+        "name":"Premium Plan",
+        "status":"PUBLISHED",
+        "features":[
+          {
+            "id":"api-calls",
+            "name":"API Calls",
+            "limit":"10000",
+            "type":"CONSUMABLE"
+            "unitLabel": "API Call",
+            "unitLabelPlural": "API Calls",
+            "metadata": {},
+          }
+        ],
+        "prices":[
+          {
+            "id": "price_id_36w8sjd",
+            "provider": "STRIPE",
+            "amount": 10000,
+            "displayAmount": "100.00",
+            "currency": "gbp",
+            "interval": "month"
+          }
+        ],
+        "isAddon":false,
+        "updatedAt":"2021-11-26T12:50:12.298Z"
+      }
+    ]
+  }
+}
+```
+
+</Tab>
+
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query listPackages($status: String!) { packages(status: $status) { id name status metadata features { id name limit type unitLabel unitLabelPlural metadata } prices { id provider amount displayAmount currency interval } isAddon updatedAt } }", "variables": "{ \"status\": \"PUBLISHED\"}" }'
+```
+
+</Tab>
+
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.packages.list({includeFeatures: true});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## user
+
+Retrieve a [User](/reference/admin-api-backend-reference/objects#user).
+
+### Arguments
+
+| Name | Type                                                             | Description                                                                                                                       |
+| ---- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `id` | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the user. This maps to the `id` field as set on the [User](/reference/admin-api-backend-reference/objects#user) object. |
+
+### Returns
+
+| Name               | Type                                                         | Description                                                                                           |
+| ------------------ | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `user`             | [User!](/reference/admin-api-backend-reference/objects#user) | The [User](/reference/admin-api-backend-reference/objects#user) corresponding to the `id` you passed. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)  | Returns any errors which may have occurred with the request.                                          |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query retrieveUser($id: String!) {
+  user(id: $id) {
+    id
+    billingId
+    name
+    email
+    metadata
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "id": "124"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "user": {
+      "id": "124",
+      "billingId": "cus_Lp1bSKob4laHDD",
+      "name": "Test User",
+      "email": "test@usekana.com",
+      "metadata": {}
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query retrieveUser($id: String!) { user(id: $id) { id name email metadata } }", "variables": "{ \"id\": \"124\"}" }'
+```
+
+</Tab>
+
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.users.retrieve({id: '124'});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## users
+
+List all [User](/reference/admin-api-backend-reference/objects#user)**s**.
+
+### Returns
+
+| Name               | Type                                                              | Description                                                  |
+| ------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------ |
+| `data`             | [\[User!\]!](/reference/admin-api-backend-reference/objects#user) | An array of all users.                                       |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)       | Returns any errors which may have occurred with the request. |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query listUsers($id: String!) {
+  users(id: $id) {
+    id
+    billingId
+    name
+    email
+    metadata
+  }
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "users": [
+      {
+        "id": "124",
+        "billingId": "cus_Lp1bSKob4laHDD",
+        "name": "Test User",
+        "email": "test@usekana.com",
+        "metadata": {}
+      }
+    ]
+  }
+}
+```
+
+</Tab>
+
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query listUsers { users { id name email metadata } }", "variables": "{ \"id\": \"124\"}" }'
+```
+
+</Tab>
+
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.users();
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## subscription
+
+Retrieve a [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription).
+
+### Arguments
+
+| Name | Type                                                             | Description                                                                                                                                                             |
+| ---- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id` | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the subscription. This maps to the `id` field as set on the [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription) object. |
+
+### Returns
+
+| Name               | Type                                                                                | Description                                                                                                                                                    |
+| ------------------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`             | [PackageSubscription!](/reference/admin-api-backend-reference/objects#subscription) | The [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription) of a user to a package. This corresponds to the `id` you passed. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)                         | Returns any errors which may have occurred with the request.                                                                                                   |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query retrieveSubscription($id: String!) {
+  subscription(id: $id) {
+    id
+    userId
+    status
+    package {
+      id
+      name
+      status
+      metadata
+      features {
+        id
+        name
+        limit
+        type
+        unitLabel
+        unitLabelPlural
+        metadata
+      }
+      prices {
+        id
+        provider
+        amount
+        displayAmount
+        currency
+        interval
+      }
+      isAddon
+      updatedAt
+    }
+  }
+}
+```
+
+---
+
+#### Request Query Variables
+
+```json
+{
+  "id": "2"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "subscription": {
+      "id": "2",
+      "userId": "124",
+      "status": "ACTIVE",
+      "package": {
+        "id": "free-trial",
+        "name": "Free Trial",
+        "status": "PUBLISHED",
+        "metadata": {},
+        "features": [
+          {
+            "name": "API Calls",
+            "limit": "1000",
+            "type": "CONSUMABLE",
+            "unitLabel": "API Call",
+            "unitLabelPlural": "API Calls",
+            "metadata": {}
+          }
+        ],
+        "prices": [
+          {
+            "id": "price_1L7NHvIiEnRX8aivoxbSWREF",
+            "provider": "STRIPE",
+            "amount": 5000,
+            "displayAmount": "50.00",
+            "currency": "gbp",
+            "interval": "month"
+          }
+        ],
+        "isAddon": false,
+        "updatedAt": "2021-11-25T16:57:42.778Z"
+      }
+    }
+  }
+}
+```
+
+</Tab>
+
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query retrieveSubscription($id: String!) { subscription(id: $id) { id userId status package { id name status metadata features { id name limit type unitLabel unitLabelPlural metadata } prices { id provider amount displayAmount currency interval } isAddon updatedAt } } }", "variables": "{ \"id\": \"2\"}" }'
+```
+
+</Tab>
+
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.subscriptions.retrieve({id: '2'});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## subscriptions
+
+List all [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription)s, or all [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription)s associated to a [User](/reference/admin-api-backend-reference/objects#user).
+
+### Arguments
+
+| Name     | Type                                                            | Description                                                                                                                                                                                       |
+| -------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `userId` | [String](/reference/admin-api-backend-reference/scalars#string) | The id of the [User](/reference/admin-api-backend-reference/objects#user) whose [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription)**s** you want to fetch. |
+
+### Returns
+
+| Name               | Type                                                                                    | Description                                                                                                                               |
+| ------------------ | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`             | [\[PackageSubscription!\]](/reference/admin-api-backend-reference/objects#subscription) | A list of subscriptions. These could correspond to a [User](/reference/admin-api-backend-reference/objects#user) if a `userId` is passed. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)                             | Returns any errors which may have occurred with the request.                                                                              |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+query listSubscriptions($userId: String!) {
+  subscriptions(userId: $userId) {
+    id
+    userId
+    status
+    package {
+      id
+      name
+      status
+      metadata
+      features {
+        id
+        name
+        limit
+        type
+        unitLabel
+        unitLabelPlural
+        metadata
+      }
+      prices {
+        id
+        provider
+        amount
+        displayAmount
+        currency
+        interval
+      }
+      isAddon
+      updatedAt
+    }
+  }
+}
+```
+
+---
+
+#### Request Query Variables
+
+```json
+{
+  "userId": "124"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "subscriptions": [
+      {
+        "id": "2",
+        "userId": "124",
+        "status": "ACTIVE",
+        "package": {
+          "id": "free-trial",
+          "name": "Free Trial",
+          "status": "PUBLISHED",
+          "metadata": {},
+          "features": [
+            {
+              "id": "api-calls",
+              "name": "API Calls",
+              "limit": "1000",
+              "type": "CONSUMABLE",
+              "unitLabel": "API Call",
+              "unitLabelPlural": "API Calls",
+              "metadata": {}
+            }
+          ],
+          "prices": [
+            {
+              "id": "price_1L7NHvIiEnRX8aivoxbSWREF",
+              "provider": "STRIPE",
+              "amount": 5000,
+              "displayAmount": "50.00",
+              "currency": "gbp",
+              "interval": "month"
+            }
+          ],
+          "isAddon": false,
+          "updatedAt": "2021-11-25T16:57:42.778Z"
+        }
+      },
+      {
+        "id": "3",
+        "userId": "124",
+        "status": "CANCELLED",
+        "package": {
+          "id": "extra-500-api-calls",
+          "name": "Extra 500 API Calls",
+          "status": "PUBLISHED",
+          "metadata": {},
+          "features": [
+            {
+              "id": "api-calls",
+              "name": "API Calls",
+              "limit": "500",
+              "type": "CONSUMABLE",
+              "unitLabel": "API Call",
+              "unitLabelPlural": "API Calls",
+              "metadata": {}
+            }
+          ],
+          "prices": [
+            {
+              "id": "price_6378hdsjhshgsu4w8AJNSGL",
+              "provider": "STRIPE",
+              "amount": 3500,
+              "displayAmount": "35.00",
+              "currency": "gbp",
+              "interval": null
+            }
+          ],
+          "isAddon": true,
+          "updatedAt": "2022-02-23T11:19:48.604Z"
+        }
+      }
+    ]
+  }
+}
+```
+
+</Tab>
+
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "query listSubscriptions($userId: String!) { subscription(userId: $userId) { id userId status package { id name status metadata features { id name limit type unitLabel unitLabelPlural metadata } prices { id provider amount displayAmount currency interval } isAddon updatedAt } } }", "variables": "{ \"userId\": \"124\"}" }'
+```
+
+</Tab>
+
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.subscriptions.list({userId: '124'});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>

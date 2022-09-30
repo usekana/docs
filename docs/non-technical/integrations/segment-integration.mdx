@@ -1,0 +1,70 @@
+---
+title: "Integration Overview"
+---
+
+## What is it?
+
+[Segment](https://segment.com/) is a customer data platform which provides one centralised way to send in of your users information, actions and usage to all the tools which you use as a business. Our Segment integration allows you to connect your existing Segment event data to:
+
+- Identify your users within Kana
+
+- Track when your users use Kana features based on their events
+
+This reduces the technical setup and integration of Kana into your product so that anyone can get started straight away, while also offering immediate insight and action into customers usage of features, packaging and pricing.
+
+## How do I connect Segment to Kana?
+
+### 1. Connect your Segment source(s) to a [Webhook destination](https://segment.com/docs/connections/destinations/catalog/webhooks/)
+
+The destination can be found in Segment when searching in their catalog or when adding the destination directly to the source:
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2FeEnOzRwIDXo860l4u30e%2FScreenshot%202022-09-12%20at%2018.22.19.png?alt=media&token=24efe166-60ec-465d-aa79-64023aaddca4)
+
+### 2. Navigate to _Settings > Webhooks (max 5)_
+
+This should show once the destination has been added:
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2FsYKihueQY4zS0suSz6JD%2FScreenshot%202022-09-12%20at%2018.29.37.png?alt=media&token=41815f3e-fecf-4c8f-a70c-ff0c964c27d5)
+
+### 3. Add the Webhook URL
+
+The following URL should be added to the _Webhook URL_ section:
+
+https://bletchley.onrender.com/segment/events
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2FTSUQ3orDrfhz3WQ6xRkC%2FScreenshot%202022-09-12%20at%2018.32.03.png?alt=media&token=958d5380-b3d1-45e9-8c13-b04a4578c603)
+
+### 4. Add your Admin API Key
+
+Within _'Headers'_, you should add _'Authorization'_ on the left and your Admin API Key on the right. You can see more on where to find your Admin API Key in our [Authorization (Backend)](/admin-api-backend/authorization-backend) guide.
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2FRGke3EZekwBzuo6q2IYk%2FScreenshot%202022-09-12%20at%2018.37.53.png?alt=media&token=02deb2d7-98ee-462b-b9d5-eeaebf8a3011)
+
+### 5. Enable the destination
+
+Click _'Save'_ and you should see a toggle switch to enable the destination.
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2F8mG6xmGXOpNEEqFlwsxj%2FScreenshot%202022-09-12%20at%2018.45.23.png?alt=media&token=2c5de4b4-aaa8-403a-9e30-d97a034803a5)
+
+You can now send any identify and track events to the destination. We recommend understanding what these two events do in Kana beforehand and setting up rules to map your track events to features before enabling the destination. However, this can be done at any time and the rules will retroactively apply.
+
+## What does the integration do?
+
+There's two core functionalities of the integration:
+
+### Identifying users
+
+Users will be created, updated or merged based on incoming [identify](https://segment.com/docs/connections/spec/identify/) events from Segment. This will allow you to sync users from your product or database into Kana with all information to best identify them.
+
+<Tip>
+We strongly recommend either sending in identify events for users or importing users via a CSV before sending in track events.
+
+</Tip>
+
+[Identify Users (Segment)](/non-technical/integrations/segment-integration/identify-users-segment)
+
+### Tracking feature usage
+
+Kana can track the usage of features by users based on incoming [track](https://segment.com/docs/connections/spec/track/) events from Segment. This will reduce the complexity of having to integrate with Kana directly when getting started, allowing you to either specify the `featureId` and `delta` in Segment event properties or set no-code rules to associate events to features by.
+
+[Track Feature Usage (Segment)](/non-technical/integrations/segment-integration/track-feature-usage-segment)

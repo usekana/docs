@@ -1,0 +1,39 @@
+---
+title: "Subscribe Users to Packages"
+---
+
+## Methods
+
+There are three ways by which a user can be subscribed to a package within Kana:
+
+1. Subscription Links
+
+2. Automatically through Stripe
+
+3. Manually through Kana
+
+### Subscription Links
+
+Kana can generate a URL which a user can be navigated to so that they can pay and subscribe to your packages via your billing provider (ie. Stripe) directly. You can see more on how to generate this "Subscription Link" and redirect users to this flow in the guide below:
+
+[Subscription Links](/guides/javascript/subscribe-users-to-packages/subscription-links)
+
+### Automatically through Stripe
+
+If you process subscriptions directly through Stripe elsewhere, our Stripe integration will automatically pick these up and create them in Kana.
+
+<Warning>
+  You must ensure that the Stripe products are mapped to packages in the [Kana
+  Dashboard](https://dashboard.kana.com) so we can link these up properly
+  [_Integrations > Stripe_](https://dashboard.usekana.com/integration).
+</Warning>
+
+You can see more on our Stripe integration and how it works here:
+
+[Stripe Integration](/non-technical/integrations/stripe-integration)
+
+### Manually through Kana
+
+For all other times where payments and/or subscriptions have not gone through Stripe, you will need to manually subscribe users to the relevant packages in Kana. Our guide gives an example on how to achieve this:
+
+[Subscribe Users Manually](/guides/javascript/subscribe-users-to-packages/subscribe-users-manually)

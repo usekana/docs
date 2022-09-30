@@ -1,0 +1,188 @@
+---
+title: "Subscribe Users to Plans"
+---
+
+When a user signs up to one of your plans, you're going to want to **subscribe** them to the plans in Kana in order to register what plans and features they have access to.
+
+<Note>
+This guide assumes that you have setup the client as we have in the [Setup](/guides/ruby/setup) instructions, and have initialized this to the `client` variable.
+
+</Note>
+
+## Grab details on the subscription
+
+You will need to ensure you have details on both:
+
+- The **user** who has subscribed to the plan in question
+
+- The **plan** which the user is being subscribed to
+
+Namely, you will need to have an identifier which maps to the `id` in Kana for both [Objects](/reference/admin-api-backend-reference/objects).
+
+<Note>
+
+The `id` for a [User](/reference/admin-api-backend-reference/objects#user) is defined by you upon creation of that user in Kana.
+
+The `id` for a [plan](/reference/admin-api-backend-reference/objects#plan) is defined by Kana and would have had to have been returned and stored by you upon creation of that plan.
+
+</Note>
+
+If neither the user nor plan exist yet in Kana, then you should create these first and then fetch/store the `id` of both:
+
+[Create Users](/guides/ruby/importing-and-creating/create-users)
+
+[Create Packages](/guides/ruby/importing-and-creating/create-packages)
+
+We will work on the assumption that you have pulled the following user and have all the following details to hand:
+
+```ruby Ruby
+current_user = {
+  "id": 123456,
+  "kana_id": "123456",
+  "name": "Zach Read",
+  "email": "zach@usekana.com"
+}
+
+plan = {
+  "name": "Extra 500 API Calls",
+  "identifier": "extra-500-api-calls"
+}
+```
+
+## Fetch the id of the plan
+
+You may have noticed that there's no `id` for the `plan` in the details we have provided. We're therefore going to need to fetch the `id` of the plan the user is subscribing to from Kana.
+
+### Send a plans query
+
+We'll need to first fetch all your plans from within Kana via the[plans](/reference/admin-api-backend-reference/queries#plans) query operation. We'll define the query string for the request to pull back the name and id of each plan, and then send the request to Kana:
+
+```ruby Ruby
+plans_query = "query fetchPlans {
+  plans {
+    name
+    id
+  }
+}"
+
+plans_response = client.execute(query: plans_query)
+```
+
+### Filter for the correct plan
+
+We now have a returned list of all the plans within the workspace, which will look a bit like so:
+
+```
+{
+  "data": {
+    "plans": [
+      {
+        "name": "Extra 500 API Calls",
+        "id": "21"
+      },
+      {
+        "name": "Base Plan",
+        "id": "20"
+      }
+    ]
+  }
+}
+```
+
+However, we only want to subscribe the user to the plan which they have subscribed to. We have the name of the plan to hand (as per the earlier defined `plans` hash) so we can filter by this when when iterating over the returned plans.
+
+We also need to ensure that the `id` of the plan is **captured in an array as an integer**. This is what the [subscribe](/reference/admin-api-backend-reference/mutations#subscribe) mutation requires.
+
+The following should do the trick:
+
+```ruby Ruby
+plan_ids = plans_response['data']['plans'].filter_map do |p|
+  p['id'].to_i if p['name'] == plan[:name]
+end
+```
+
+<Note>
+**What if I want to select more than one plan to subscribe a user to?**
+
+This is possible - you will need to filter over the plans so that more than one `id` is inserted into the given array.
+
+</Note>
+
+## Send the request to subscribe the user
+
+Both the `id` of the user and the `id` of the plan are now accessible. We're ready to send the request to subscribe the user to the plan.
+
+We do this through the [subscribe](/reference/admin-api-backend-reference/mutations#subscribe) mutation. This requires two arguments:
+
+1. `userId` \- the `id` of the [User](/reference/admin-api-backend-reference/objects#user)
+
+2. `planIds` \- an array of integers mapping to the [plan](/reference/admin-api-backend-reference/objects#plan) `id`'s
+
+<Note>
+**What format should the userId be in?**
+
+We expect the `userId` argument to be a [String](/reference/admin-api-backend-reference/scalars#string) \- as this matches the `id` on the [User object](/reference/admin-api-backend-reference/objects#user). If any other field type is used, an error will occur telling you we can't accept any field type except String.
+
+</Note>
+
+We have the identifier for the user we defined earlier, and the `id` of the plan now in an array as fetched from the previous step.
+
+We'll define these as variables to send alongside the query:
+
+```ruby Ruby
+sub_variables = {
+  "userId": current_user[:kana_id],
+  "planIds": plan_ids
+}
+```
+
+Next, we have to define the query string for the mutation operation which will also specify the details from the [subscription](/reference/admin-api-backend-reference/objects#subscription) object which we want to return.
+
+In our case, we'll return:
+
+- The `name` of the plan (which helps in confirming it's correct)
+
+- If the plan is an add-on through the `isAddon` boolean
+
+- The `features` associated to the plans - with their `name`, `type` and `limit`
+
+This helps us in both confirming that the plan associated to the user is the correct one, and gives us details on the different features which a user has access and allowances of now they are subscribed to the plan.
+
+```ruby Ruby
+sub_query = "mutation subscribeUserToPlan($planIds: [Int!]!, $userId: String!) {
+  subscribe(planIds: $planIds, userId: $userId) {
+    plan {
+      id
+      name
+      isAddon
+      features {
+        name
+        type
+        limit
+      }
+    }
+  }
+}"
+```
+
+We can now send the request to Kana in order to subscribe the user to the plan:
+
+```ruby Ruby
+sub_response \= client.execute(query: sub_query, variables: sub_variables)
+```
+
+<Check>
+  **Congratulations** 🎉 You've now successfully subscribed a user to a plan.
+</Check>
+
+Feel free to use the response you get back to store any returned fields of use to your records, log the call, or raise any errors if the call is not successful.
+
+## Next Steps
+
+You're going to want to tell us when a user has used a particular feature so that we can calculate how much of the feature they have consumed and what they have left.
+
+[Record Feature Usage](/guides/ruby/integrating-kana/record-feature-usage)
+
+Likewise, when that user hits their limit of a particular feature, or if they haven't subscribed to a plan with that given feature at all, you're going to need to identify their entitlement to that feature in order to block off access and/or inform them of what they have left.
+
+[Identify a User's Feature Entitlement](/guides/ruby/integrating-kana/identify-a-users-feature-entitlement)

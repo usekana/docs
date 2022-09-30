@@ -1,0 +1,68 @@
+---
+title: "Integration Overview"
+---
+
+## What is it?
+
+Stripe is a billing provider which allows you to take accurate payments for the products users have subscribed to. Linking Stripe with Kana will ensure that your users are subscribed successfully to packages and will be billed properly based on their subscriptions and usage of your features.
+
+## How do Stripe concepts link to Kana concepts?
+
+In Stripe, customers will have a [subscription](https://stripe.com/docs/api/subscriptions/object) which can contain multiple [subscription items](https://stripe.com/docs/api/subscription%5Fitems). Each subscription item will have a set quantity and a [price](https://stripe.com/docs/api/prices). A price is associated with one [product](https://stripe.com/docs/api/products).
+
+In Kana, users will have [subscriptions](/reference/admin-api-backend-reference/objects#packagesubscription) to a [package](/non-technical/packages/what-are-packages) which can contain multiple [package features](/non-technical/features/what-are-features#how-do-features-work-in-packages). Each package feature will have a limit. A package feature is associated with one feature.
+
+This means that the following Stripe objects map to the following Kana objects:
+
+| Stripe            | Kana            |
+| ----------------- | --------------- |
+| Customer          | User            |
+| Subscription      | Subscription    |
+| Subscription      | Package         |
+| Subscription Item | Package Feature |
+| Price             | Package Feature |
+| Product           | Feature         |
+
+<Note>
+**Caveat:** Stripe is flexible enough so that you may have set up your Stripe products to be the packages users subscribe to as opposed to the features within. That is equally fine - you can instead consider a Stripe subscription item/price/product to map to a Kana package in this instance.
+
+</Note>
+
+## How do I connect Stripe to Kana?
+
+### Steps
+
+1. Navigate to _Integration_
+
+2. Click on the _Connect_ under Stripe
+
+3. Sign in through Stripe
+
+4. Connect to a Stripe account
+
+<Warning>
+**Do not choose** _**'Skip this form'**_ **when connecting a Stripe account**
+
+When Stripe is in Test Mode, there's a button to _'Skip this form'_ when creating or connecting an account. We strongly recommend not doing this as this will create a dummy account causing issues with our Stripe Integration (ie. Stripe products & prices will not sync between Stripe & Kana).
+
+</Warning>
+
+## What does the integration do?
+
+There's two core functionalities of the integration:
+
+### Importation & Sync
+
+Kana will import in all your existing customers and subscriptions from Stripe, and will allow you to map your Kana packages and features to any existing Stripe counterparts.
+
+Then we will sync data between Stripe and Kana when updates are made in either one (ie. to packages or subscriptions) so that your users will always be successfully subscribed and correctly billed.
+
+[Stripe Importation & Sync Overview](/non-technical/integrations/stripe-integration/stripe-importation-and-sync-overview)
+
+### Subscriptions
+
+We automatically sync any subscriptions made in Stripe to Kana and [map them to the packages as you have setup](/non-technical/integrations/stripe-integration/stripe-importation-and-sync-overview#mapping-stripe-prices-to-kana).
+
+However, you can also create direct subscriptions to Kana packages and have these reflected in Stripe by generating a Stripe payment link via the Kana API. This allows users to navigate to the returned URL, pay, and instantly subscribe to any given package(s) you specified.
+
+[Subscription Links](/guides/javascript/subscribe-users-to-packages/subscription-links)

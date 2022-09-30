@@ -1,0 +1,76 @@
+---
+title: "Create new mapping rules"
+description: "You can create rules which Kana will process incoming Segment track events against to map to features. Usage of that feature by the user in the event will then be recorded."
+---
+
+This can be done either proactively (before events are sent in) or reactively (after events are sent in) - both incoming events and previous events which were not able to match to features will be processed against rules.
+
+## Steps
+
+### 1. Click _'Go to rules'_
+
+The button may instead say _'View Rules'_ if all events could be mapped to features.
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2FiQczam1hDcuSiBi5YJ9e%2FScreenshot%202022-09-15%20at%2011.21.50.png?alt=media&token=5deea623-b48f-41dd-b553-acd5cf12c5b4)
+
+### 2. Click _'Create another rule'_
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2F9eKZNA4LB1TnPjMgDqhX%2FScreenshot%202022-09-15%20at%2011.27.27.png?alt=media&token=33a4d987-ef5c-420a-af0e-38481b4d291f)
+
+### 3. Fill in the details of the rule
+
+The following information is needed:
+
+#### Rule Name
+
+This is the name of the rule that will be visible on the Dashboard. Make it user friendly so that it's easily understandable later exactly which event and feature this rule targets.
+
+#### Conditions
+
+You will see a box under _'Map an event when'_. These are where you will place your conditions to match events by in order to be mapped to a feature.
+
+You can either select:
+
+- **Event name:** The name of the Segment track event (which is taken from the `event` field).
+
+- **Property path:** The name of a property sent in the Segment track event (all fields within the `properties` object). We require both the key of the property and the value of that property. The name can be a path if it's nested in an object, such as `object.name`.
+
+[You can see more on what a Segment track event looks like in the Segment docs.](https://segment.com/docs/connections/spec/track/)
+
+If you need to add more conditions then hit the _'+'_ button next to an existing condition.
+
+<Warning>
+An event can only have one name so only one event name can be specified as a condition.
+
+</Warning>
+
+#### Feature
+
+You will see a dropdown under _'Then record usage for'_. This is where you will select the name of the feature which you want this rule to record usage events for.
+
+#### Example
+
+In our example, we can see that there is 1 unmapped event. This event has a name of `Package Created` and property named `type` which has a value of .
+
+We have a consumable feature named 'Add-on Packages' which this event corresponds to as a package which is an add-on (as said by the type) has been created. Therefore we want to track that this feature has been used from this event and would put the following criteria:
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2FFGQVBlc6txu5gQMDD4or%2FScreenshot%202022-09-15%20at%2012.27.42.png?alt=media&token=6314f1d9-9376-48b1-b0b2-5102662bc291)
+
+### 4. Click _'Create'_
+
+![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2F8RD2oDD7eQk0i5MVVqgv%2FScreenshot%202022-09-15%20at%2012.36.44.png?alt=media&token=e50afc47-5923-40a3-8029-a217b294498d)
+
+## What next?
+
+<Check>
+**Congratulations** 🎉 You've created a package in Kana.
+
+</Check>
+
+Send in track events from Segment which match this rule and they will record feature usage for the given feature automatically!
+
+[Track Feature Usage (Segment)](/non-technical/integrations/segment-integration/track-feature-usage-segment)
+
+**I still see rules in the table which should have matched - is this expected?**Although the rule has now been created, it may take some time to reprocess your existing events against this rule. You may need to refresh the page and/or wait up to an hour to see these reflected - although times may vary based on how many events need to be processed.
+
+If you see still see events that you think should have matched a rule after this, please write into the team and we'll take a deeper look!

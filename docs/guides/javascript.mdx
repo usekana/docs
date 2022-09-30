@@ -1,0 +1,83 @@
+---
+title: "Overview"
+---
+
+## Setup
+
+Before we get started, you're going to want to ensure you have successfully installed all required libraries and have initialized them correctly to make successful calls.
+
+<Card
+  title="Setup"
+  icon={regular("screwdriver-wrench")}
+  href="/guides/javascript/setup"
+/>
+
+You'll also need to ensure that you have setup all your features and packages within the [Kana Dashboard](https://dashboard.usekana.com). You can see more on these concepts within the [Kana Concepts](/kana-concepts) page, and more on how to create features and packages through the following guides.
+
+<Card
+  title="Create Features"
+  icon={regular("star")}
+  href="/guides/ruby/importing-and-creating/create-features"
+/>
+
+<Card
+  title="Create Packages"
+  icon={regular("box-taped")}
+  href="/guides/ruby/importing-and-creating/create-packages"
+/>
+
+## Creating & Subscribing Users
+
+You can then start thinking about bringing the users of your product into Kana so that they can subscribe to your packages.
+
+<Card
+  title="Create Users"
+  icon={regular("user-plus")}
+  href="/guides/ruby/importing-and-creating/create-users"
+/>
+
+<Note>
+**Using Stripe?**
+
+If you integrate with Stripe, we will not only initially import all your users from existing subscriptions, but will also create new users (and subscriptions) when customers sign up to packages through Stripe.
+
+You may use your own custom setup to achieve this, but we also provide a handy way to generate a URL so that a user can navigate through to Stripe's checkout and pay there to subscribe - see more in the [paymentlink](/reference/admin-api-backend-reference/queries#paymentlink) query.
+
+</Note>
+
+[Subscribe Users to Packages](/guides/javascript/subscribe-users-to-packages)
+
+## Integrating Kana
+
+Afterwards, you'll be ready to integrate Kana into your product to deal with everything related to monetization, pricing and subscriptions.
+
+The following guides will allow you to start integrating some of these vital flows into your product:
+
+<Card
+  title="Record Feature Usage"
+  icon={regular("video")}
+  href="/guides/ruby/integrating-kana/record-feature-usage"
+/>
+
+<Card
+  title="Block Feature Access (Backend)"
+  icon={regular("user-lock")}
+  href="/guides/javascript/block-feature-access-backend"
+/>
+
+<Card
+  title="Block Feature Access (Frontend)"
+  icon={regular("user-lock")}
+  href="/guides/javascript/block-feature-access-frontend"
+/>
+
+<Check>
+**Congratulations 🎉**
+
+Once you hit the end of this list, you're likely ready to go!
+
+There may be other flows in your product touching packaging and pricing which Kana needs to integrate with and/or help you achieve. Our API is flexible enough with the given [Queries](/reference/admin-api-backend-reference/queries) and [Mutations](/reference/admin-api-backend-reference/mutations) available that you should have everything you need to build these out.
+
+We'd love to hear more on what you do end up building out, or if you don't feel you have the resources at your disposal to build these out yet. Let us know!
+
+</Check>

@@ -1,0 +1,138 @@
+---
+title: "Kana Concepts"
+description: "In order to get Kana working, you'll need to first understand a few of the concepts that make up our product, alongside how these all work together. This guide acts as a reference for all things Kana - in particular the terminology and inner workings of how things link."
+---
+
+## Key Terminology
+
+Here's three terms specific to Kana which are vital to know in order to understand how we think about them and what we expect from them:
+
+<AccordionGroup>
+    <Accordion title="Feature">
+
+    A feature is **anything that can be used for billing in your product**. It does not necessarily have to be billed currently or be a part of your existing packages - but if it could be, then that’s a feature.
+    Features are **included in the packages** which you offer to your **users**.
+    Kana recognises two kinds of features:
+
+    - **Binary:** There is only one of this feature in your product (ie. a particular product) whereby you give users access to the feature.
+    - **Consumable:** There can be more than one of its type in your product (ie. Seat, API Call, etc.) whereby you give users an amount of this feature.
+
+    [See more in our packages guide.](/non-technical/packages)
+
+    </Accordion>
+
+    <Accordion title="Package">
+
+    A package is a **collection of features**.
+    A **user subscribes to a package** in order to access the features within a package.
+    Kana recognises two kinds of packages:
+    **Base:** A core package. A user has to subscribe to one base package but cannot subscribe to more than one package at a time.
+    **Add-on:** An additional package which can be added on top of the base package. A user can subscribe to as many add-on packages as they want.
+
+    </Accordion>
+
+    <Accordion title="User">
+
+    A user is **anyone that uses your product**.
+    A user **subscribes to a package** in order to get the features within a package.
+    Your product may have a higher level which ties users together - such as a workspace - whereby multiple users would be on the same package. **Each user of your product, however, should be their own user in Kana.** You will need to subscribe them to packages individually.
+
+    </Accordion>
+
+</AccordionGroup>
+
+## How does everything fit together?
+
+### Features & Package
+
+You can create a feature.
+
+You can also create a package. The feature can then be added to the package.
+
+When a feature is added to a package, we record details about the feature as it exists in that particular package.
+
+<Note>
+  We create a
+  [PackageFeature](/reference/admin-api-backend-reference/objects#packagefeature)
+  in order to record these details.
+</Note>
+
+This includes information such as:
+
+- The type of feature
+
+- The limit of the feature within that package
+
+#### Feature Type
+
+The type of the feature within the package can either be:
+
+- **Binary:** You give users _access_ to the feature. There is no limit.
+
+- **Consumable:** You give users an _amount_ of this feature. There will be a limit.
+
+As the type of feature is added when a feature is created, and is related to the feature overall (not just when it's added to a package), we will automatically record this based on what the type of the feature is.
+
+#### Feature Limit
+
+You can set an amount of a feature that is given to a user if they select this package. The type of feature changes the required values:
+
+- **Binary**: No limit needs to be provided.
+
+- **Consumable**: The number specifying the amount of the feature given in the package (ie. `“500”`).
+
+The same feature can therefore be used across multiple packages with different limits. The type of feature will remain consistently the same throughout however.
+
+<Note>
+**What if I want to give an unlimited amount of a feature in a package?**
+
+You can specify that the amount should be unlimited via the _Set to unlimited_ button.
+
+</Note>
+
+### Users & Subscriptions
+
+You can create a user.
+
+That user can then be subscribed to a package.
+
+That user will then be entitled to the features within the package they are subscribed to.
+
+<Note>
+  We record this with an
+  [Entitlement](/reference/admin-api-backend-reference/objects#entitlement)
+  which is linked to a particular feature and user.
+</Note>
+
+When looking for how much of a feature a user is entitled to, you will see information on:
+
+- The [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription) of a user to a package with that feature
+
+- The amount of the feature that the user is entitled to plus their [Consumption](/reference/admin-api-backend-reference/objects#consumption)
+
+#### Subscription
+
+You can see a package which the feature in question is linked to, plus the user that is subscribed to that package and thus has access to the feature in question.
+
+<Note>
+**What if a user is subscribed to multiple packages with the same feature?**
+
+If the user is subscribed to multiple package which contain the same feature, then we will look for the associated [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription) with the highest `limit` and will only return the [Entitlement](/reference/admin-api-backend-reference/objects#entitlement) (and thus [Consumption](/reference/admin-api-backend-reference/objects#consumption)) for that package/feature combination.
+
+</Note>
+
+#### Consumption
+
+You can see how much of the feature the user is entitled to, and the amount which they have currently used of that feature.
+
+<Warning>
+  This only appears for a feature which is Consumable (as noted by the type of
+  the feature on the related package). [More here.](/kana-concepts#feature-type)
+</Warning>
+
+<Note>
+**How do I report usage of a feature to Kana?**
+
+You will need to tell us when a user has used a particular feature, and how much of the feature they have used. You can do this through our API/SDKs with the [recordUsage](/reference/admin-api-backend-reference/mutations#recordusage) mutation.
+
+</Note>

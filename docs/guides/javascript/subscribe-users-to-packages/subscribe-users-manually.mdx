@@ -1,0 +1,76 @@
+---
+title: "Subscribe Users Manually"
+description: "If you want to subscribe users to packages without automatically doing so through a billing provider, you will need to manually do so."
+---
+
+## Prerequisites
+
+You will need to have details on:
+
+- The **package(s)** the user will subscribe
+
+- The **user** who is going to be subscribed to the package
+
+If neither the user nor package exist yet in Kana, then you should create these first:
+
+[Create Users](/guides/ruby/importing-and-creating/create-users)
+
+[Create new packages](/non-technical/packages/create-new-packages)
+
+Once these are created, you will need to ensure you know the `id` of both.
+
+<Note>
+Both the `id` for a [User](/reference/admin-api-backend-reference/objects#user) and a [Package](/reference/admin-api-backend-reference/objects#package) are defined by you upon creation in Kana.
+
+You can find the identifiers for both in the [Dashboard](https://dashboard.usekana.com), or by using the [package](/reference/admin-api-backend-reference/queries#package) and [user](/reference/admin-api-backend-reference/queries#user) queries to pull all respective records and grab the `id `from the one(s) you need
+
+</Note>
+
+## Code Sample
+
+### Basic
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+  apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.subscriptions.create({packageIds: ["basic"], userId: "124"});
+console.log(data);
+console.log(error);
+```
+
+### Example
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js';
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+app.post('/subscribe', function(req, res){
+  const userId = req.body.user.id; // Assumes user object has been sent in request body to this endpoint
+  const packageIds = req.body.packageIds // Assumes array of packageIds has been sent in request body to this endpoint
+  const { data, error } = await client.subscriptions.create({packageIds: packageIds, userId: userId});
+
+  if error {
+    res.status(400).send("We experienced an error when attempting to susbcribe you. Try again or contact support.")
+  } else {
+    // Send back JSON response of full susbscription object
+    res.json(data);
+  }
+});
+
+```
+
+## Next Steps
+
+<Check>
+  **Congratulations** 🎉 You've now successfully redirected a user to subscribe
+  to Kana packages through Stripe.
+</Check>
+
+Upon successful payment, this user will be subscribed to the package(s) and will have access to the features within. You can now implement checks to confirm they should have access to these features (either in your frontend and/or backend) and record usage of these features - which is even more necessary when they are consumable features whereby a customer is provisioned a certain amount.

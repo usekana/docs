@@ -1,0 +1,96 @@
+---
+title: "Subscription Links"
+description: "If you're integrated with Stripe, Kana makes it easy to subscribe a customer through Stripe to a package."
+---
+
+You can do this with our _Subscription Links_ \- connected to Stripe [Payment Links](https://stripe.com/gb/payments/payment-links) \- a URL which a user can be navigated to so that they can pay and subscribe to your packages via Stripe directly.
+
+<Note>
+**What about billing providers other than Stripe?**
+
+While it's not currently possible to integrate with other billing providers, we are actively looking into the possibilities here. Reach out and let us know which you'd like to see!
+
+</Note>
+
+## Prerequisites
+
+You will need to ensure you have [connected to Stripe in the Dashboard](https://dashboard.usekana.com/integration) and linked your Kana packages/features to Stripe products. Our Stripe guide goes into depth on how to achieve this:
+
+[Stripe Integration](/non-technical/integrations/stripe-integration)
+
+You will also need to have details on:
+
+- The **package(s)** the user will subscribe
+
+If the package doesn't exist in Kana, then you should create this first:
+
+[Create new packages](/non-technical/packages/create-new-packages)
+
+Once this is created, you will need to ensure you know the `id`.
+
+<Note>
+The`id` for a [Package](/reference/admin-api-backend-reference/objects#package) is defined by you upon creation in Kana.
+
+You can find the identifier in the [Dashboard](https://dashboard.usekana.com), or by using the [package](/reference/admin-api-backend-reference/queries#package) query to pull all respective records and grab the `id `from the one you need.
+
+</Note>
+
+<Note>
+**What if the user subscribing to the package is not yet created in Stripe?**
+
+Any new users who subscribe to a package through a Payment Link will also be created in Kana and Stripe (so that you do not need to create them yourself). We will create the user in Stripe/Kana with the email given to Stripe.
+
+</Note>
+
+## Code Sample
+
+### Basic
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js'; \\
+
+const client \= new KanaAdmin({
+  apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } \= await client.payments.generateLink({packageIds: \['124'\]});
+console.log(data);
+console.log(error);
+```
+
+### Example
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js';
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+app.post('/subscribe', function(req, res){
+  const packageIds = req.body.packageIds // Assumes array of packageIds has been sent in request body to this endpoint
+  const { data, error } = await client.payments.generateLink({packageIds: packageIds});
+
+  if (error) {
+    res.status(400).send("We experienced an error when attempting to susbcribe you. Try again or contact support.")
+  } else {
+    // Redirects to the Stripe URL for a customer to pay (and subscribe) through
+    res.redirect(data.url);
+  }
+});
+```
+
+## Next Steps
+
+<Check>
+  **Congratulations** 🎉 You've now successfully redirected a user to subscribe
+  to Kana packages through Stripe.
+</Check>
+
+Upon successful payment, this user will be subscribed to the package(s) and will have access to the features within. You can now implement checks to confirm they should have access to these features (either in your frontend and/or backend) and record usage of these features - which is even more necessary when they are consumable features whereby a customer is provisioned a certain amount.
+
+[Block Feature Access (Backend)](/guides/javascript/block-feature-access-backend)
+
+[Block Feature Access (Frontend)](/guides/javascript/block-feature-access-frontend)
+
+[Record Feature Usage](/guides/ruby/integrating-kana/record-feature-usage)

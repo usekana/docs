@@ -1,0 +1,130 @@
+---
+title: "Stripe Importation & Sync Overview"
+---
+
+When connecting Stripe to Kana, we will import in all your Stripe subscriptions and ensure these are synced between the two platforms when changes take place.
+
+In order to achieve this, however, the following needs to be done:
+
+1. Stripe prices must be mapped to Kana packages
+
+2. Stripe customers must be linked to (or created as) users in Kana
+
+This is because we need to understand which features/packages a user has subscribed to via Stripe, and associate this subscription to a user in Kana.
+
+## Mapping Stripe Prices to Kana
+
+### What do I map from and to?
+
+In Stripe, customers will have a [subscription](https://stripe.com/docs/api/subscriptions/object) which can contain multiple [subscription items](https://stripe.com/docs/api/subscription%5Fitems). Each subscription item will have a set quantity and a [price](https://stripe.com/docs/api/prices). A price is associated with one [product](https://stripe.com/docs/api/products).
+
+Kana looks at both the Stripe [price](https://stripe.com/docs/api/prices) and the associated [product](https://stripe.com/docs/api/products) as one. Together these make up the quantity, price, billing structure, and the actual product itself. This is what will be mapped to the relevant Kana object.
+
+How you have setup your Stripe prices (with the associated product) in Kana will determine how and what they will be mapped to in Kana.
+
+<Note>
+**What if there is no price or product in Stripe which maps to Kana?**
+
+You will currently need to create this price (and associated product) yourself in Stripe and then return to Kana to map this. If you'd like to see the relevant details created in Stripe automatically then let us know!
+
+</Note>
+
+#### Prices/Products as Packages
+
+This works on the assumption that you have setup your Stripe prices (and associated product) to be mapped to an overall package as opposed to the features within that package.
+
+Therefore, Stripe objects would map to Kana objects like so:
+
+| Stripe             | Kana         |
+| ------------------ | ------------ |
+| Subscription       | Subscription |
+| Subscription Items | Package      |
+| Price              | Package      |
+| Product            | Package      |
+
+<Note>
+**What if I have a tiered/usage-based feature within a package which needs to be mapped to its own Stripe price/product?**
+
+Sometimes you may have features within a package which are consumable and billed on a tiered basis in Stripe. The related Stripe price/product that calculates this _should_ map to a feature in Kana - but we do not offer feature-level pricing yet.
+
+To properly map these then, you will have to **create an Add-on package in Kana** containing the feature to be billed with the correct amount/interval, and map the Stripe price/product to that new Kana package.
+
+</Note>
+
+#### Prices/Products as Features
+
+This works on the assumption that you have setup your Stripe prices (and associated product) to be mapped to features, meaning a Stripe [subscription](https://stripe.com/docs/api/subscriptions) represents an overall package with each [subscription item](https://stripe.com/docs/api/subscription%5Fitems/object) being a feature within that package.
+
+Therefore, Stripe objects would map to Kana objects like so:
+
+| Stripe            | Kana                     |
+| ----------------- | ------------------------ |
+| Subscription      | Subscription (& Package) |
+| Subscription Item | Package Feature          |
+| Price             | Package Feature          |
+| Product           | Feature                  |
+
+<Warning>
+Stripe prices (and their associated products) can **only be mapped to Kana packages currently**. You would need to **create an Add-on package in Kana** containing the given feature (with the correct amount/duration) for every Stripe price/product. You can then map the Stripe price/product to that new package.
+
+</Warning>
+
+### How do I map?
+
+This is done during the initial importation flow, and then can be done for newly created prices/products we've attempted to sync unsuccessfully by going to [Integration > Stripe](https://dashboard.usekana.com/integration/stripe).
+
+You can see more on mapping during importation in the Import from Stripe guide.
+
+[Import Subscriptions from Stripe](/non-technical/integrations/stripe-integration/import-subscriptions-from-stripe)
+
+<Note>
+**What if I want to unlink a price/product from a package?**
+
+This is not currently possible as subscriptions are live and therefore unlinking could cause issues with your user's subscriptions. Let us know if you need us to do this and we'll help you out!
+
+</Note>
+
+## Mapping Stripe Customers to Kana
+
+### Where do you map from and to?
+
+Each Stripe subscription is associated to a Stripe [customer](https://stripe.com/docs/api/customers). This Stripe customer corresponds to a Kana [user](/reference/admin-api-backend-reference/objects#user).
+
+We map the following fields from Stripe customers to Kana users:
+
+| Stripe  | Kana        |
+| ------- | ----------- |
+| `id`    | `billingId` |
+| `email` | `email`     |
+| `name`  | `name`      |
+
+#### Identifiers
+
+Stripe customers only have an email field as opposed to a unique externally provided identifier. Therefore, we have to **use the email to match and create Stripe users** via.
+
+This means that the `id` given to a user in Kana if they're:
+
+- **New users created from Stripe importation or sync** \- will have their email as their `id`.
+
+- **Existing users created before Stripe importation** \- will have been given an `id` by you previously. This may be a user's `email` but not necessarily.
+
+<Warning>
+The `id` of a user (`userId`) is required throughout many operations when integrating Kana into your product. Therefore, you should keep in mind that **the** **`id`** **of a Kana user if imported/synced from Stripe may not be the same as the identifier of a user in your backend**.
+
+We're working on ways to allow you to import and change user data (including the `id`) currently. For the time being, it's worth either:
+
+1. [Importing/syncing all your users to Kana programmatically beforehand](/guides/ruby/importing-and-creating/create-users)
+
+2. Using the `email` of a user as their Kana `id` also
+
+</Warning>
+
+### How do I map?
+
+This is done **automatically**.For any imported or incoming Stripe subscription, we always look to see if the related Stripe customer matches to an existing Kana user. We look at both the `billingId` and the `email` to achieve this. If they do, we associate the subscription to that existing user. If they don’t, we create a new user and associate that subscription to the new user.
+
+## What's next?
+
+You should not have an understanding of what and how your Stripe prices and customers are mapped (or should be mapped) to Kana. This means you can now import in your existing subscriptions and ensure subsequent syncing of subscriptions works.
+
+[Import Subscriptions from Stripe](/non-technical/integrations/stripe-integration/import-subscriptions-from-stripe)

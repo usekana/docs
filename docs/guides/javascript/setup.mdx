@@ -1,0 +1,107 @@
+---
+title: "Setup"
+---
+
+## Overview
+
+Kana has two separate platform features:
+
+- **Admin** \- This is our Backend API (with SDK wrappers) intended to be used server-side.
+
+- **Client** \- This is our Frontend SDK intended to be used client-side.
+
+Together these allow you to install and integrate Kana wherever you may need to in your application and beyond. How you want to integrate Kana will dictate which you need to install and setup. We go more into what each does and how to install below.
+
+## Backend (Admin)
+
+Our Admin API is by far our most flexible and powerful. You can take all actions you need with Kana server-side, both reading from and writing data to Kana as is necessary.
+
+### Quickstart
+
+#### Install (CLI)
+
+```bash Terminal
+npm i @usekana/admin\-kana\-js
+```
+
+#### Initialize Client
+
+```javascript Node.js
+import { KanaAdmin } from "@usekana/admin-kana-js";
+
+const adminClient = new KanaAdmin({
+  apiKey: { API_KEY },
+});
+```
+
+### Guides
+
+[Admin API (Backend)](/admin-api-backend)
+
+[Authorization (Backend)](/admin-api-backend/authorization-backend)
+
+## Frontend (Client)
+
+Our Client SDK is perfect for building out all read-only flows and components which utilise Kana data directly from the client. Imagine paywalls, information on feature usage, and package overviews - easily and readily available on demand.
+
+### Quickstart
+
+#### Install (CLI)
+
+```bash Terminal
+npm i @usekana/client-kana-js
+```
+
+#### Initialize Client (Simple)
+
+```javascript Node.js
+import { KanaUserClient } from "@usekana/client-kana-js";
+
+const apiKey = "pub_live_xyz"; //Make sure this is your PUBLIC API Key
+
+// Stored client-side to be assigned to this constant
+const currentUser = {
+  id: "123456",
+  name: "Zach Read",
+  email: "zach@usekana.com",
+};
+
+const kanaUserClient = new KanaUserClient({
+  apiKey: apiKey,
+  userId: currentUser.id,
+});
+```
+
+### Guides
+
+[Client SDK (Frontend)](/client-sdk-frontend)
+
+[Authorization (Frontend)](/client-sdk-frontend/authorization-frontend)
+
+## Next Steps
+
+<Check>
+  **Congratulations** 🎉 You've now successfully installed and initialized Kana.
+</Check>
+
+You'll want to ensure first that you have created all your features and packages within the [Kana Dashboard](https://dashboard.usekana.com). You can see more on these concepts within the [Kana Concepts](/kana-concepts) page, and more on how to create features and packages through the following guides.
+
+<Card
+  title="Create new features"
+  icon={regular("star")}
+  href="/non-technical/features/create-new-features"
+/>
+
+<Card
+  title="Create new packages"
+  icon={regular("box-taped")}
+  href="/non-technical/packages/create-new-packages"
+/>
+
+Once that's done, it's integration time! You'll need to start by importing existing users and creating all new users in Kana when they sign up.
+
+<Card
+  title="Create Users"
+  icon={regular("user-plus")}
+  href="/guides/javascript/create-users"
+/>

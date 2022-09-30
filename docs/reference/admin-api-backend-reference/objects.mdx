@@ -1,0 +1,208 @@
+---
+title: "Objects"
+description: "Objects represent the resources that you can access."
+---
+
+They contain fields. Each field has its own type, which could be [Scalars](/reference/admin-api-backend-reference/scalars), [Enums](/reference/admin-api-backend-reference/enums), or other objects. Fields may have arguments. Fields with arguments work exactly like top-level [Queries](/reference/admin-api-backend-reference/queries).
+
+## Feature
+
+A feature of your product which you could consider to be billable. Features can be added to packages.
+
+<Note>
+**How can I see the limit given to a feature?**
+
+A feature does not have a global limit. Limits are given to features _within_ packages (ie. a [PackageFeature](/reference/admin-api-backend-reference/objects#packagefeature)) as each package can have a different limit for a particular feature. You will need to retrieve the [package](/reference/admin-api-backend-reference/queries#package) in order to grab the feature as it exists within a package to see the limit.
+
+</Note>
+
+### Fields
+
+| Name            | Type                                                                     | Description                                                                                                               |
+| --------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| id              | [String!](/reference/admin-api-backend-reference/scalars#string)         | The id of the feature which is provided by you.                                                                           |
+| name            | [String!](/reference/admin-api-backend-reference/scalars#string)         | The name of the feature.                                                                                                  |
+| type            | [FeatureType!](/reference/admin-api-backend-reference/enums#featuretype) | The type of the feature. Either `BINARY` or `CONSUMABLE`.                                                                 |
+| unitLabel       | [String](/reference/admin-api-backend-reference/scalars#string)          | The name of the consumable unit (eg. _Message_, _API Call_, etc). Only present if `type` is `CONSUMABLE`.                 |
+| unitLabelPlural | [String](/reference/admin-api-backend-reference/scalars#string)          | The pluralised name of the consumable unit (eg. _Messages_, _API Calls_, etc). Only present if `type` is `CONSUMABLE`.    |
+| metadata        | [JSON](/reference/admin-api-backend-reference/scalars#json)              | A set of key-value data which was attached by yourself to this object (ie. often additional data deemed useful to store). |
+| packages        | [\[Package!\]!](/reference/admin-api-backend-reference/objects#plan)     | A list of the packages which are associated with the feature.                                                             |
+
+### Fields with arguments
+
+| Name        | Argument | Argument Type                                                    | Return Type                                                               | Description                          |
+| ----------- | -------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------ |
+| entitlement | userId   | [String!](/reference/admin-api-backend-reference/scalars#string) | [Entitlement](/reference/admin-api-backend-reference/objects#entitlement) | A user's entitlement to the feature. |
+
+<Note>
+**What if a user is subscribed to multiple packages with the same feature?**
+
+If the user is subscribed to multiple packages which contain the same feature, then we will look for the associated [Package](/reference/admin-api-backend-reference/objects#package) with the highest `limit` and will only return the [Entitlement](/reference/admin-api-backend-reference/objects#entitlement) for that package/feature combination.
+
+</Note>
+
+## Package
+
+A collection of features. A user can subscribe to packages in order to gain access to the features within. This can be a base package, or an add-on (ie. those at an additional cost on top of the base).
+
+### Fields
+
+| Name      | Type                                                                                  | Description                                                                       |
+| --------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| id        | [String!](/reference/admin-api-backend-reference/scalars#id)                          | The id of the package which is provided by you.                                   |
+| name      | [String!](/reference/admin-api-backend-reference/scalars#string)                      | The name of the package.                                                          |
+| isAddon   | [Boolean!](/reference/admin-api-backend-reference/scalars#boolean)                    | Represents whether the package is an add-on (`true`) or a base package (`false`). |
+| status    | [PackageStatus!](/reference/admin-api-backend-reference/enums#packagestatus)          | Represents whether the package is a `DRAFT`, `ARCHIVED` or `PUBLISHED`.           |
+| updatedAt | [DateTime!](/reference/admin-api-backend-reference/scalars#datetime)                  | When the package was last updated.                                                |
+| features  | [\[PackageFeature!\]!](/reference/admin-api-backend-reference/objects#planfeature)    | A list of the features within the package.                                        |
+| prices    | [\[PackagePrice!\]!](/reference/admin-api-backend-reference/objects#packagefeature-1) | A list of prices which relate to this package.                                    |
+
+## PackageFeature
+
+The feature as it sits within the package.
+
+### Fields
+
+| Name            | Type                                                                     | Description                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| id              | [String!](/reference/admin-api-backend-reference/scalars#string)         | The id of the [Feature](/reference/admin-api-backend-reference/objects#feature).                                                            |
+| name            | [String!](/reference/admin-api-backend-reference/scalars#string)         | The name of the feature within the package. This can be different than the feature it relates to.                                           |
+| type            | [FeatureType!](/reference/admin-api-backend-reference/enums#featuretype) | The type of the feature. Either `BINARY` or `CONSUMABLE`.                                                                                   |
+| limit           | [Int](/reference/admin-api-backend-reference/scalars#int)                | Indicates the amount of the feature given in the package (ie. `“500”`). Only present if `type` is `CONSUMABLE`.                             |
+| unitLabel       | [String](/reference/admin-api-backend-reference/scalars#string)          | The name of the consumable unit for the feature (eg. _Message_, _API Call_, etc). Only present if `type` is `CONSUMABLE`.                   |
+| unitLabelPlural | [String](/reference/admin-api-backend-reference/scalars#string)          | The pluralised name of the consumable unit for the feature (eg. _Messages_, _API Calls_, etc). Only present if `type` is `CONSUMABLE`.      |
+| metadata        | [JSON](/reference/admin-api-backend-reference/scalars#json)              | A set of key-value data which was attached by yourself to the respective feature object (ie. often additional data deemed useful to store). |
+
+## PackagePrice
+
+An available price for the package which links to your billing provider (ie. Stripe).
+
+### Fields
+
+| Name          | Type                                                             | String                                                                                        |
+| ------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| id            | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the price as given by your billing provider (ie. `price_1L7NHvIiEnRX8aivoxbSWREF`). |
+| provider      | [String!](/reference/admin-api-backend-reference/scalars#string) | The billing provider to which this price belongs.                                             |
+| amount        | [Int!](/reference/admin-api-backend-reference/scalars#int)       | The amount which users will be charged.                                                       |
+| displayAmount | [String!](/reference/admin-api-backend-reference/scalars#string) | A read-friendly version of the amount.                                                        |
+| currency      | [String!](/reference/admin-api-backend-reference/scalars#string) | The currency of the amount which will be charged.                                             |
+| interval      | [String!](/reference/admin-api-backend-reference/scalars#string) | The frequency at which someone will be charged this price.                                    |
+
+## Entitlement
+
+A user's entitlement to a particular feature.
+
+### Fields
+
+| Name        | Type                                                                          | Description                                                                                                                    |
+| ----------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| access      | [Boolean!](/reference/admin-api-backend-reference/scalars#boolean)            | Specifies whether the user has access (`true`) or not (`false`) to the feature.                                                |
+| reason      | [String!](/reference/admin-api-backend-reference/scalars#string)              | The reason why the user either has access to the feature or not.                                                               |
+| consumption | [**Consumption**](/reference/admin-api-backend-reference/objects#consumption) | The amount of the feature which the user has used, their overall allowance (`budget`), and if they can go over that allowance. |
+
+## Consumption
+
+A user's consumption of a particular feature. Details the amount they have used, the amount they were granted, and if they can run over the given amount of the feature.
+
+### Fields
+
+| Name           | Type                                                               | Description                                                                                                                           |
+| -------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| used           | [Int!](/reference/admin-api-backend-reference/scalars#int)         | The amount of the feature which has been used by the user.                                                                            |
+| budget         | [Int](/reference/admin-api-backend-reference/scalars#int)          | The amount of the feature which has been granted to the user. Will return `null` if unlimited.                                        |
+| overageEnabled | [Boolean!](/reference/admin-api-backend-reference/scalars#boolean) | Flags whether a user can run over the amount of the feature (`true`) or if there is a hard limit that should prevent usage (`false`). |
+
+## ConsumptionInPeriod
+
+Shows the consumption of a feature within a given time period.
+
+### Fields
+
+| Name        | Type                                                                 | Description                                                  |
+| ----------- | -------------------------------------------------------------------- | ------------------------------------------------------------ |
+| periodStart | [DateTime!](/reference/admin-api-backend-reference/scalars#datetime) | The start of the usage period in ISO 8601 timestamp format.  |
+| periodEnd   | [DateTime!](/reference/admin-api-backend-reference/scalars#datetime) | The end of the usage period in ISO 8601 timestamp format.    |
+| consumption | [String!](/reference/admin-api-backend-reference/scalars#string)     | The consumption of the feature within the given time period. |
+
+## PackageSubscription
+
+The subscription of a user to a particular package.
+
+### Fields
+
+| Name    | Type                                                                                   | Description                                                                                |
+| ------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| id      | [String!](/reference/admin-api-backend-reference/scalars#int)                          | A Kana-generated identifier for the subscription.                                          |
+| userId  | [String!](/reference/admin-api-backend-reference/scalars#string)                       | The id of the user.                                                                        |
+| status  | [SubscriptionStatus!](/reference/admin-api-backend-reference/enums#subscriptionstatus) | The status of the subscription of the user to the package. Either `ACTIVE` or `CANCELLED`. |
+| package | [Package!](/reference/admin-api-backend-reference/objects#plan)                        | The package which is associated to the subscription.                                       |
+
+## CanUseFeatureData
+
+A user's entitlement to a particular feature.
+
+### Fields
+
+| Name        | Type                                                                      | Description                                                                                                                    |
+| ----------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| access      | [Boolean!](/reference/admin-api-backend-reference/scalars#boolean)        | Specifies whether the user has access (`true`) or not (`false`) to the feature.                                                |
+| reason      | [String!](/reference/admin-api-backend-reference/scalars#string)          | The amount of the feature which the user has used, their overall allowance (`budget`), and if they can go over that allowance. |
+| consumption | [Consumption](/reference/admin-api-backend-reference/objects#consumption) | The amount of the feature which the user has used, their overall allowance (`budget`), and if they can go over that allowance. |
+
+## ShowUsageData
+
+Provides the current and past consumption of a feature within the given time period(s).
+
+### Fields
+
+| Name    | Type                                                                                           | Description                                                                               |
+| ------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| current | [ConsumptionInPeriod](/reference/admin-api-backend-reference/objects#consumptioninperiod)      | The consumption a the feature in the current period of usage.                             |
+| past    | [\[ConsumptionInPeriod!\]](/reference/admin-api-backend-reference/objects#consumptioninperiod) | A list detailing the previous consumption of a feature within the given periods of usage. |
+
+## SubscriptionLink
+
+Provides a link which a user should navigate to in order to pay and subscribe to a package.
+
+Currently only works if Stripe is linked as a billing provider for the package.
+
+### Fields
+
+| Name | Type                                                             | Description                                                                    |
+| ---- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| url  | [String!](/reference/admin-api-backend-reference/scalars#string) | The generated URL for a user to navigate to and pay to subscribe to a package. |
+
+## User
+
+A user of your product who can subscribe to packages and access and use the features within.
+
+### Fields
+
+| Name      | Type                                                             | Description                                                                                                               |
+| --------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| id        | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the user which is provided by you.                                                                              |
+| billingId | [String](/reference/admin-api-backend-reference/scalars#string)  | The id of the user as given by your billing provider (ie. `cus_Lp1bSKob4laHDD`).                                          |
+| name      | [String](/reference/admin-api-backend-reference/scalars#string)  | The name of the user.                                                                                                     |
+| email     | [String](/reference/admin-api-backend-reference/scalars#string)  | The email of the user.                                                                                                    |
+| metadata  | [JSON](/reference/admin-api-backend-reference/scalars#json)      | A set of key-value data which was attached by yourself to this object (ie. often additional data deemed useful to store). |
+
+## RecordedUsage
+
+Information returned on whether usage was recorded or not (as per the [recordUsage](/reference/admin-api-backend-reference/mutations#recordusage) operation).
+
+### Fields
+
+| Name     | Type                                                               | Description                                                                        |
+| -------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| recorded | [Boolean!](/reference/admin-api-backend-reference/scalars#boolean) | Specifies whether the usage of the feature was recorded (`true`) or not (`false`). |
+| reason   | [String](/reference/admin-api-backend-reference/scalars#string)    | The reason why the usage of the feature was either recorded or not.                |
+
+## GeneratedUserToken
+
+The client-side token needed for [Secure Mode](/client-sdk-frontend/authorization-frontend/secure-mode) authentication of the [Client SDK (Frontend)](/client-sdk-frontend).
+
+### Fields
+
+| Name  | Type                                                            | Description                                      |
+| ----- | --------------------------------------------------------------- | ------------------------------------------------ |
+| token | [String](/reference/admin-api-backend-reference/scalars#string) | The generated token which is scoped to the user. |

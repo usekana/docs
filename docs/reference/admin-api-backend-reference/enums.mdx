@@ -1,0 +1,93 @@
+---
+title: "Enums"
+---
+
+[Enums](https://graphql.org/learn/schema/#enumeration-types) (also known as enumeration types) represent possible sets of values for a field.
+
+You can see the [Objects](/reference/admin-api-backend-reference/objects) to understand which fields resolve to enums and therefore have a restricted selection of allowed values.
+
+## FeatureType
+
+Represents the type of a [Feature](/reference/admin-api-backend-reference/objects#feature).
+
+### Values
+
+| Name       | Description                                                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BINARY     | A user would either have access or not to the given feature in a package. There are either no set amounts or unlimited amounts of a feature when it is binary. |
+| CONSUMABLE | A user has a set amount of the given feature in a package. There are limits for a feature when it's consumable.                                                |
+
+## PackageStatus
+
+Represents the status of a [Package](/reference/admin-api-backend-reference/objects#package).
+
+### Values
+
+| Name      | Description                                                                                                                                                   |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ARCHIVED  | The package has been archived and is therefore no longer in use. The package will not be modifiable. Users will also not be able to subscribe to the package. |
+| DRAFT     | The package is still being drafted. Users will not be able to subscribe to the package.                                                                       |
+| PUBLISHED | The package is published and is therefore live for users to subscribe to.                                                                                     |
+| ALL       | Used solely for listing all packages as an argument for the [packages](/reference/admin-api-backend-reference/queries#packages) query.                        |
+
+## ResetPeriod
+
+Represents theperiod in which the **usage** of a [Feature](/reference/admin-api-backend-reference/objects#feature) resets.
+
+<Note>
+**Does this impact when someone is billed?**
+
+No - when someone is billed for a feature/package is decided by the price of the package/features which they they subscribed to. You would have defined the `billingPeriod` in the BillingTemplate when creating (or editing) the package.
+
+</Note>
+
+### Values
+
+| Name  | Description                                                                                       |
+| ----- | ------------------------------------------------------------------------------------------------- |
+| YEAR  | Usage will reset in a year from the time someone has subscribed to the package with the feature.  |
+| MONTH | Usage will reset in a month from the time someone has subscribed to the package with the feature. |
+| DAY   | Usage will reset in a day from the time someone has subscribed to the package with the feature.   |
+
+## SubscriptionStatus
+
+Represents the status of a [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription). When a subscription has been imported in or synced from Stripe, this will mirror the `status` of the subscription from there. [You can see more on Stripe's definitions here](https://stripe.com/docs/billing/subscriptions/webhooks#events).
+
+### Values
+
+| Name               | Description                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| ACTIVE             | The user is currently subscribed to the given package.                                   |
+| TRIALING           | The user is currently subscribed to the given package on a trialled basis.               |
+| CANCELLED          | The subscription is no longer valid as the user has cancelled it.                        |
+| PAST_DUE           | The payment for the subscription is past due and the user needs to pay to regain access. |
+| UNPAID             | The payment for the subscription is unpaid and the user needs to pay to regain access.   |
+| INCOMPLETE         | The subscription has just been created but payment still needs to take place.            |
+| INCOMPLETE_EXPIRED | The needed payment for the new subscription has expired.                                 |
+
+<Note>
+**What status does a subscription need to have in order for a user to have access to the features within the subscribed package?**
+
+Users will only have access to features in packages related to subscriptions which are ACTIVE or TRIALING. They will not be entitled to access the features otherwise.
+
+</Note>
+
+<Note>
+**Does CANCELLED mean that the user is not subscribed to the package in the PackageSubscription?**
+
+Not necessarily - it only means that this particular PackageSubscription is no longer valid. A user may have since subscribed to the same package again, although we will record this with a separate PackageSubscription.
+
+You should look through all of a user's subscriptions via the [subscriptions](/reference/admin-api-backend-reference/queries#subscriptions) query, and identify the packages they have an ACTIVE SubscriptionStatus for.
+
+</Note>
+
+## RecordUsageAction
+
+Represents how you want the usage of a feature to be recorded (used for [recordUsage](/reference/admin-api-backend-reference/mutations#recordusage)).
+
+### Values
+
+| Name | Description                                                                                |
+| ---- | ------------------------------------------------------------------------------------------ |
+| ADD  | Adds to the existing usage of a feature.                                                   |
+| SET  | Overwrites any existing usage of a feature and sets the `delta` given as the total amount. |

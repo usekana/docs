@@ -1,0 +1,265 @@
+---
+title: "Code Samples"
+description: "Want to simply get stuck in yourself? Here's some example code which ranges from setup to implementation. You can repurpose these for your own app."
+---
+
+## Installation
+
+### Admin SDK
+
+#### Install (CLI)
+
+```bash Terminal
+npm i @usekana/admin-kana-js
+```
+
+#### Initialize client
+
+```javascript Node.js
+import { KanaAdmin } from "@usekana/admin-kana-js";
+
+const adminClient = new KanaAdmin({
+  apiKey: API_KEY, // Replace with own Private API Key
+});
+```
+
+### Simple Mode Client SDK
+
+#### Install (CLI)
+
+```bash Terminal
+npm i @usekana/client-kana-js
+```
+
+#### Initialize client
+
+```javascript Node.js
+import { KanaUserClient } from "@usekana/client-kana-js";
+
+const apiKey = "pub_live_xyz"; // Make sure this is your PUBLIC API Key
+
+// Stored client-side to be assigned to this constant
+const currentUser = {
+  id: "123456",
+  name: "Zach Read",
+  email: "zach@usekana.com",
+};
+
+const kanaUserClient = new KanaUserClient({
+  apiKey: apiKey,
+  userId: currentUser.id,
+});
+```
+
+### Secure Mode Client SDK
+
+#### Install (CLI)
+
+```bash Terminal
+npm i @usekana/client-kana-js
+```
+
+#### Fetch Token Endpoint (using Express & Admin SDK)
+
+```javascript Node.js
+require("dotenv").config();
+
+const express = require("express");
+const app = express();
+const port = 3000;
+
+const kana = require("@usekana/admin-kana-js");
+
+const kanaClient = new kana.KanaAdmin({
+  apiKey: process.env.KANA_API_KEY, // You will need to store this as an environment variable
+});
+
+app.post("/kana/token", async function (req, res, next) {
+  const userId = req.body.userId;
+  const userToken = await kanaClient.users.generateToken({ userId: userId });
+  res.status(200).send(userToken);
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
+```
+
+#### Fetch Token Function (Client)
+
+```javascript Node.js
+import { KanaUserClient } from "@usekana/client-kana-js";
+
+async function grabKanaToken(user) {
+  const userId = user.id;
+  try {
+    const kanaToken = await fetch("/kana/token", {
+      method: "POST",
+      mode: "cors",
+      body: JSON.stringify({ userId: userId }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return kanaToken;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+// Stored client-side to be assigned to this constant
+const currentUser = {
+  id: "123456",
+  name: "Zach Read",
+  email: "zach@usekana.com",
+};
+
+const userToken = await grabKanaToken(currentUser);
+
+const kanaUserClient = new KanaUserClient({
+  userToken,
+});
+```
+
+## Record Feature Usage
+
+```javascript Node.js
+require('dotenv').config();
+
+const express = require('express');
+const app = express();
+const port = 3000;
+
+const passport = require('passport');
+import { KanaAdmin } from '@usekana/admin-kana-js';
+
+const adminClient = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+    onError: async (error) => {
+        console.error(error);
+  }
+});
+
+app.post('/api/user', function(req, res, next) {
+    const userId = req.body.userId;
+    const featureId = req.body.featureId;
+    const delta = req.body.delta || 1
+
+    kanaClient.features.recordUsage({userId: userId, featureId: featureId, delta: delta})
+      .then((response) => {
+        if (response.recorded == false) {
+          console.log('Unknown error in recording Kana Feature Usage');
+          res.status(400).send({
+            "success": false
+        });
+      } else
+      res.status(200).send({
+            "success": true
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(400).send({
+            "name": error.name,
+            "error": error.message
+        });
+      });
+  });
+```
+
+## Block Feature Usage
+
+### Backend
+
+```javascript
+require('dotenv').config();
+
+const express = require('express');
+const app = express();
+const port = 3000;
+
+const passport = require('passport');
+
+import { KanaAdmin } from '@usekana/admin-kana-js';
+import { sendMessage } from '/modules/sendMessage.js'
+
+const client = new KanaAdmin({
+    apiKey: process.env.API_KEY // Using dotenv to pull API_KEY variable
+});
+
+app.post('/message', function(req, res, next) {
+  const userId = req.user.id; // Assumes passport is being used for auth
+  const featureId = 'messages'
+
+  const message = req.body.message // Assumes message is being sent as object in request body
+
+  const checkAccessAndSendMessage = async () => {
+    const { data, error } = await client.features.canUse({userId: userId, id: featureId});
+    if (error) {
+      return error;
+    }
+    if (data) {
+      if (data.access == true) {
+        const sentMessage = sendMessage(message);
+        return sentMessage;
+      } else {
+        throw new Error("Kana: User cannot access feature");
+      }
+    }
+  };
+
+  checkAccessAndSendMessage().
+    .then((result) => {
+      console.log(result);
+      res.status(200).send('Message was successfully sent');
+    .catch((error) => {
+      console.log(error);
+      res.status(403).send(error.message);
+  });
+});
+```
+
+### Frontend
+
+```jsx
+import React from "react";
+import "./App.css";
+import { useEffect, useState } from "react";
+import { KanaUserClient } from "@usekana/client-kana-js";
+
+function App() {
+  const [canUseFeature, setCanUseFeature] = useState(false);
+
+  useEffect(() => {
+    const fetchAccess = async () => {
+      const kanaClient = new KanaUserClient({
+        userToken, // Fetch server-side
+      });
+
+      const { data, error } = await kanaClient.canUseFeature({
+        featureId: "api-calls",
+      });
+      if (error) {
+        console.log(error);
+      }
+      if (data) {
+        setCanUseFeature(data.access);
+      }
+    };
+
+    fetchAccess();
+  }, []);
+
+  return (
+    <main>
+      <h1>Kana Block Feature Usage Example</h1>
+      <button type="button" disabled={!canUseFeature}>
+        {" "}
+        Use Feature{" "}
+      </button>
+    </main>
+  );
+}
+
+export default App;
+```

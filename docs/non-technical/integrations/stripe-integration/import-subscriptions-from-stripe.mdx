@@ -1,0 +1,44 @@
+---
+title: "Import Subscriptions from Stripe"
+---
+
+After initially [connecting to Stripe](/non-technical/integrations/stripe-integration#how-do-i-connect-stripe-to-kana), you will then be able to:
+
+1. Link all your Stripe prices/products to Kana packages
+
+2. Import in all your users and subscriptions
+
+<Warning>
+If you haven't given the [Stripe Importation & Sync Overview](/non-technical/integrations/stripe-integration/stripe-importation-and-sync-overview) guide a look, then we strongly recommend it. It will give you a vital understanding of how things should be mapped between Stripe and Kana.
+
+</Warning>
+
+## Steps
+
+### 1. Navigate to [_Integration > Stripe_](https://dashboard.usekana.com/integration)\_\_
+
+### 2. Click _Import_
+
+### 3. Map every imported Stripe price to a Kana package
+
+You should see a table of imported Stripe prices with a dropdown on the left. Select the package in the dropdown which the Stripe price applies to.
+
+<Note>
+Make sure to create your packages within Kana before importing so that you have them available to link to Stripe prices/products.
+
+</Note>
+
+### 4. Click _Import_ again
+
+You should now see an Imported Stripe Subscriptions table detailing the imported subscriptions and the user they relate to.
+
+## What's next?
+
+<Check>
+**Congratulations** 🎉 You have successfully linked your prices/products to Stripe and imported in any users and subscriptions.
+
+</Check>
+
+You can run this import flow as many times as you like. However, bear in mind that we will automatically sync any new Stripe subscriptions to Kana.
+
+Subscriptions may come in which contain new prices/products you've setup in Stripe and have not yet mapped in Kana. If this is the case, these will appear in [Integration > Stripe](https://dashboard.usekana.com/integration/stripe) to be mapped, much like in Step 2.

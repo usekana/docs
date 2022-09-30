@@ -1,0 +1,162 @@
+---
+title: "Secure Mode"
+---
+
+The Secure Mode authorization of our Client SDK requires a `userToken` to be provided in order to make calls. You'll have to fetch this token via the GraphQL API (server-side) before passing it client-side.
+
+<Warning>
+  This is different from your API Key. You should not expose (nor attempt to
+  use) your Private API Key client-side.
+</Warning>
+
+This token (aka. `userToken` ) will be linked to one particular Kana [User](/reference/admin-api-backend-reference/objects#user) \- meaning actions taken and data returned from the available [methods](/reference/client-sdk-frontend-reference#methods) will be tied only to that user.
+
+We'll walk through an example flow of how to obtain and provide this successfully below.
+
+## Walkthrough
+
+### 1. Gain details on the user
+
+You will need to ensure you have details on the **user** who you want to make calls for. Namely, you will need to have an identifier which maps to the `id` in Kana.
+
+<Note>
+The `id` for a [User](/reference/admin-api-backend-reference/objects#user) is defined by you upon creation in Kana.
+
+</Note>
+
+If the user does not yet exist in Kana, then you should create them first:
+
+[Create Users](/guides/ruby/importing-and-creating/create-users)
+
+We will work on the assumption that you have pulled the following user and have all the following details to hand (as will be used throughout our examples):
+
+```javascript Node.js / Javascript
+const currentUser = {
+  id: 123456,
+  kanaId: "123456",
+  name: "Zach Read",
+  email: "zach@usekana.com",
+};
+```
+
+### 2. Fetch the token on the server
+
+We can then make a server-side call to generate the token . This can be done with the GraphQL API via the [generateUserToken](/reference/admin-api-backend-reference/mutations#generateusertoken) mutation.
+
+<Note>
+**Don't know how to authenticate and make calls to the GraphQL API?**
+
+You should read our [Quick Start](/quick-start) guide to get familiar within a few minutes and ensure you've grabbed your API Key to authorize requests properly.
+
+</Note>
+
+You'll need to provide a `userId` argument which maps to the `id` for the [User](/reference/admin-api-backend-reference/objects#user) (as pulled earlier):
+
+<Tabs>
+
+<Tab title="cURL">
+```bash 
+curl \
+-X POST \
+-H "Content-Type: application/json" \
+-H "Authorization: {API_KEY}" \
+-d '{ "query": "mutation { generateUserToken(userId: \"123456\") }" }' \
+https://api.usekana.com/graphql
+```
+
+</Tab>
+
+<Tab title="Node.js">
+We assume you are using Express and have your server within initial routes setup and working. You'll otherwise need the following to ensure the Kana SDK is installed and available to make the necessary call. Just make sure to replace `KANA_API_KEY` with your actual API Key, or store it as an environment variable (in production):
+
+```javascript
+require("dotenv").config();
+const kana = require("@usekana/admin-kana-js");
+
+const kanaClient = new kana.KanaAdmin({
+  apiKey: process.env.KANA_API_KEY, // You will need to store this as an environment variable
+});
+```
+
+You can then setup a `POST` endpoint which, upon being hit, will send a request to Kana in order to generate the token for the user, and return the token in response.
+
+<Note>
+  We assume that the details of the user (as per `currentUser`) are known
+  client-side only and are being sent from the client as part of this step. Our
+  example assigns the id of the user to a `userId` constant, so if the id from
+  the user needs to be pulled from elsewhere (including server-side), you can
+  edit the `userId` constant to reflect that.
+</Note>
+
+```javascript
+app.post("/kana/token", async function (req, res, next) {
+  const userId = req.body.kanaId;
+  const userToken = await kanaClient.users.generateToken({ userId: userId });
+  res.status(200).send(userToken);
+});
+```
+
+</Tab>
+
+</Tabs>
+
+### 3. Pass the token to the client
+
+Now that you have the token, you're going to want to pass it down to the client so we can initialize the Client SDK.
+
+It's up to you on how and when you want to achieve this, but we've provided some examples below which show the token being generated and sent downstream upon a dedicated `/kana/token` endpoint being hit.
+
+On the client-side, we have the following function available which attempts to make a `POST` request to the `/kana/token` endpoint we setup earlier:
+
+```javascript Client
+async function grabKanaToken(user) {
+  const userId = user.kanaId;
+  try {
+    const kanaToken = await fetch("/kana/token", {
+      method: "POST",
+      mode: "cors",
+      body: JSON.stringify({ userId: userId }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return kanaToken;
+  } catch (e) {
+    console.log(e);
+  }
+}
+```
+
+If successful, the function will return the value of the token. We can assign this to a constant (so we can use this value later) like so:
+
+```javascript
+const userToken = await grabKanaToken(currentUser);
+```
+
+<Note>
+Notice that the function is passed `currentUser` as an argument. This is the one we have hard-coded but you would have pulled/stored from before - and we assume you do this client-side. If you instead do this server-side, then you can:
+
+- Remove this as an argument of the function
+
+- Remove the `body` of the Fetch API request
+
+- Ensure the route function is updated to not require this (as per Step 2)
+
+</Note>
+
+### 4. Initialize the Kana JS Client
+
+The `userToken` is now available client-side. Let's pass it in as an argument to initialize the client.
+
+```javascript JavaScript
+const kanaUserClient = new KanaUserClient({
+  userToken,
+});
+```
+
+<Check>
+**Congratulations** \- you've successfully setup the Client SDK to make calls 🎉
+
+Explore the [Client SDK (Frontend) Reference](/reference/client-sdk-frontend-reference) for more on what you can do.
+
+</Check>

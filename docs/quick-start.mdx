@@ -1,0 +1,166 @@
+---
+title: "Quick Start"
+---
+
+import { Api } from "@/ui/Api";
+
+## Introduction
+
+The idea of this guide is to give you a **Hello World** moment whereby you'll start using Kana and walk away with everything you need to successfully use our Admin API. We'll get you setup and provide simple example code to create something within Kana.
+
+By the end of this guide, you're going to have:
+
+1. An **API Key**
+
+2. Made a **request** to our GraphQL API
+
+3. **Created** a user
+
+Time to get started 🚀
+
+## Get your API Key
+
+Our Admin API uses **Bearer authentication** to validate requests - meaning you'll need an API Key to use as a token within requests.
+
+<Note>
+**Where can I get my API Key from?**
+
+You can fetch this on the Dashboard via the [API page](https://dashboard.usekana.com/apiKeys). It's the one listed under **Admin API Key**.
+
+</Note>
+
+This should be provided as an `Authorization` header within your request - we do not require `Bearer` to precede the token. It should look something like this:
+
+```bash
+Authorization: prv_test_4f72905f0c23c0ce0l680cuip07a7c8f1392df72
+```
+
+## Make your first request
+
+For our first request, we're going to **create a user** through the **Admin API**. This API is intended for the backend and uses **GraphQL**.
+
+### Create a user
+
+Creates a [User](/reference/admin-api-backend-reference/objects#user). A standard GraphQL POST request should use the application/json content type, and include a JSON-encoded body of the following form:
+
+<Api api="POST https://api.usekana.com/graphql" apiComponents={
+  [
+    {
+      type: 'ParamField',
+      attributes: [
+        {
+          name: 'body',
+          value: 'query',
+        },
+        {
+          name: 'type',
+          value: 'string',
+        },
+        {
+          name: 'required',
+          value: true,
+        }
+      ]
+    },
+    {
+      type: 'ParamField',
+      attributes: [
+        {
+          name: 'body',
+          value: 'variables',
+        },
+        {
+          name: 'type',
+          value: 'string',
+        }
+      ]
+    }
+  ]
+}>
+
+</Api>
+
+#### Body parameters
+
+<ParamField body="query" required type="String">
+The query (as a string) detailing the operation, arguments (defined in the variables), and fields to return. [See more in the GraphQL guides](https://graphql.org/learn/queries/#variables).
+
+Returns the [User](/reference/admin-api-backend-reference/objects#user) you created. You can therefore specify `id`, `name` and `email` as fields to return in the query.
+
+</ParamField>
+
+<ParamField body="variables" type="String">
+The arguments for the request which match the fields and types defined in the query. These need to be be a stringified and escaped JSON object. They can also be hardcoded in the query if you'd prefer (making this optional), but they do need to be provided somewhere. [See more in the GraphQL guides](https://graphql.org/learn/queries/#variables).
+
+Requires an `input` variable with the fields from [CreateUserInput](/reference/admin-api-backend-reference/inputs#createuserinput) (ie. `id`, `name`, `email`, etc).
+
+</ParamField>
+
+Note that the endpoint for our Admin API is always `/graphql`, no matter what operation you perform.
+
+Here's an example of what this request would look like in [cURL](https://curl.se/):
+
+```bash cURL
+curl https://api.usekana.com/graphql \\
+-X POST \\
+-H "Authorization: INSERT_API_KEY" \\
+-H "Content-Type: application/json" \\
+-d '{ "query": "mutation createUser($input: CreateUserInput!) { createUser(input: $input) { id name email } }", "variables": "{ \\"input\\": { \\"id\\": \\"test\\", \\"name\\": \\"Test User\\", \\"email\\": \\"test@company.com\\"" } }" }'
+```
+
+Now we can do the following:
+
+1. **Copy** the above command and paste it in your CLI/Terminal
+
+2. **Replace** `INSERT_API_KEY` with your own Kana API Key
+
+3. **Run** the command
+
+When this runs, it should output JSON which looks like this:
+
+```json Response
+{
+  "data": {
+    "createUser": {
+      "id": "test",
+      "name": "Test User",
+      "email": "test@company.com"
+    }
+  }
+}
+```
+
+This matches the data shape of the query, because [GraphQL operations will mirror the order of fields provided within the request in the response](https://graphql.org/blog/graphql-a-query-language/) \- so you'll always know what to expect.
+
+<Check>
+**Congratulations** 🎉
+
+You just made a successful call to our GraphQL API and created your first user within Kana!
+
+</Check>
+
+## Next Steps
+
+You may now want to know a little more about what you just created within Kana, alongside some of the other concepts that make up the fabric of our product. If you're unfamiliar, then take a look at our Concepts guide:
+
+<Card
+  title="Kana Concepts"
+  icon={regular("book-bookmark")}
+  href="/kana-concepts"
+>
+  Understand a few of the concepts that make up Kana
+</Card>
+
+If you're already in the know, then it's time to dive in deeper by setting up Kana and integrating it within your product. You can either follow our guided walkthrough, or jump straight into our API & SDK documentation:
+
+<Card title="Guides" icon={regular("book-open-cover")} href="/guides">
+  How to setup and integrate Kana into your product
+</Card>
+
+<Card
+  title="Admin API (Backend)"
+  icon={regular("rectangle-terminal")}
+  href="/admin-api-backend"
+>
+  How to use the Admin API
+</Card>

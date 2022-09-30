@@ -1,0 +1,119 @@
+---
+title: "Block Feature Access (Backend)"
+---
+
+Sometimes your users may not be allowed to access a particular feature because they aren't subscribed to a plan with that feature, or they have no further allowance of that feature remaining. You're going to want to identify if they are allowed to use a feature in order to **grant or block access**.
+
+<Note>
+  You should implement this each time you create a feature within Kana to ensure
+  your user's don't accidentally use the feature in question when they
+  shouldn't.
+</Note>
+
+## Prerequisites
+
+You will need to ensure you have details on both:
+
+- The **user** who has used the feature
+
+- The **feature** which the user has used
+
+If neither the user nor feature exist yet in Kana, then you should create these first:
+
+[Create Users](/guides/ruby/importing-and-creating/create-users)
+
+[Create Features](/guides/ruby/importing-and-creating/create-features)
+
+Once these are created, you will need to ensure you know the `id` of both.
+
+<Note>
+Both the`id` for a [User](/reference/admin-api-backend-reference/objects#user) and a [Feature](/reference/admin-api-backend-reference/objects#feature) are defined by you upon creation in Kana.
+
+You can find the identifiers for both in the [Dashboard](https://dashboard.usekana.com), or by using the [features](/reference/admin-api-backend-reference/queries#features) and [users](/reference/admin-api-backend-reference/queries#users) queries to pull all respective records and grab the `id `from the one you need.
+
+</Note>
+
+## Code Sample
+
+### Basic
+
+```javascript Node.js
+import { KanaAdmin } from "@usekana/admin-kana-js";
+
+const client = new KanaAdmin({
+  apiKey: API_KEY, // Replace with own Private API Key
+});
+
+const { data, error } = await client.features.canUse({
+  userId: "124",
+  featureId: "api-calls",
+});
+console.log(data);
+console.log(error);
+```
+
+### Example
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js';
+import { sendMessage } from '/modules/sendMessage.js'
+
+const client = new KanaAdmin({
+    apiKey: {API_KEY}
+});
+
+app.post('/message', function(req, res, next) {
+  const userId = req.user.id; // Assumes passport is being used for auth
+  const featureId = 'messages'
+
+  const message = req.body.message // Assumes message is being sent as object in request body
+
+  const checkAccessAndSendMessage = async () => {
+    const { data, error } = await client.features.canUse({userId: userId, id: featureId});
+    if (error) {
+      return error;
+    }
+    if (data) {
+      if (data.access == true) {
+        const sentMessage = sendMessage(message);
+        return sentMessage;
+      } else {
+        throw new Error("Kana: User cannot access feature");
+      }
+    }
+  };
+
+  checkAccessAndSendMessage().
+    .then((result) => {
+      console.log(result);
+      res.status(200).send('Message was successfully sent');
+    .catch((error) => {
+      console.log(error);
+      res.status(403).send(error.message);
+  });
+});
+```
+
+<Note>
+  This should always take place **before the feature is used.** It should be the
+  first thing you do to ensure you return as early as possible when they don't
+  have access, preventing any unnecessary continuation or accidental usage.
+</Note>
+
+## Next Steps
+
+<Check>
+  **Congratulations** 🎉 You've now successfully checked a users entitlement to
+  a feature and blocked them from using the feature if they should have no
+  access.
+</Check>
+
+You should look to ensure this is setup for all your features and in all places where those features could be used by customers. For instance, if you had a `messages` feature, your users may be able to send messages via your UI and through an API call - both should block access when necessary.
+
+You may want to also implement something similar on the frontend of your application to prevent feature access at source.
+
+[Block Feature Access (Frontend)](/guides/javascript/block-feature-access-frontend)
+
+**If you haven't yet recorded usage of your features when access is granted,** **we strongly recommend this as a next step.** It's a key requirement in order for us to understand a user's entitlement towards a feature.
+
+[Record Feature Usage](/guides/javascript/record-feature-usage)

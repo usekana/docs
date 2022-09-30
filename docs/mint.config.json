@@ -1,0 +1,178 @@
+{
+  "name": "Kana",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.png",
+  "colors": {
+    "primary": "#1A202C",
+    "light": "#ACADEB",
+    "dark": "#1A202C",
+    "ultraLight": "#F1ECF9",
+    "ultraDark": "#171923"
+  },
+  "anchors": [
+    {
+      "name": "Pricing Index",
+      "icon": "tags",
+      "url": "https://pricing-index.usekana.com/"
+    },
+    {
+      "name": "GraphiQL IDE",
+      "color": "#E535AB",
+      "icon": "chart-network",
+      "url": "https://api.usekana.com/graphql"
+    }
+  ],
+  "topbarLinks": [
+    {
+      "name": "Blog",
+      "url": "https://www.usekana.com/blog"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Sign in",
+    "url": "https://dashboard.usekana.com/auth/login"
+  },
+  "navigation": [
+    {
+      "group": "Home",
+      "pages": ["introduction", "quick-start", "kana-concepts"]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides",
+        {
+          "group": "Javascript",
+          "pages": [
+            "guides/javascript",
+            "guides/javascript/setup",
+            "guides/javascript/create-users",
+            {
+              "group": "Subscribe Users to Packages",
+              "pages": [
+                "guides/javascript/subscribe-users-to-packages",
+                "guides/javascript/subscribe-users-to-packages/subscription-links",
+                "guides/javascript/subscribe-users-to-packages/subscribe-users-manually"
+              ]
+            },
+            "guides/javascript/record-feature-usage",
+            "guides/javascript/block-feature-access-backend",
+            "guides/javascript/block-feature-access-frontend"
+          ]
+        },
+        {
+          "group": "Ruby",
+          "pages": [
+            "guides/ruby",
+            "guides/ruby/setup",
+            {
+              "group": "Importing & Creating",
+              "pages": [
+                "guides/ruby/importing-and-creating",
+                "guides/ruby/importing-and-creating/create-features",
+                "guides/ruby/importing-and-creating/create-packages",
+                "guides/ruby/importing-and-creating/create-users"
+              ]
+            },
+            {
+              "group": "Integrating Kana",
+              "pages": [
+                "guides/ruby/integrating-kana",
+                "guides/ruby/integrating-kana/subscribe-users-to-plans",
+                "guides/ruby/integrating-kana/record-feature-usage",
+                "guides/ruby/integrating-kana/identify-a-users-feature-entitlement"
+              ]
+            }
+          ]
+        },
+        "code-samples"
+      ]
+    },
+    {
+      "group": "Admin API (Backend)",
+      "pages": ["admin-api-backend", "admin-api-backend/authorization-backend"]
+    },
+    {
+      "group": "Client SDK (Frontend)",
+      "pages": [
+        "client-sdk-frontend",
+        {
+          "group": "Authorization (Frontend)",
+          "pages": [
+            "client-sdk-frontend/authorization-frontend",
+            "client-sdk-frontend/authorization-frontend/simple-mode",
+            "client-sdk-frontend/authorization-frontend/secure-mode"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Reference",
+      "pages": [
+        {
+          "group": "Admin API (Backend) Reference",
+          "pages": [
+            "reference/admin-api-backend-reference",
+            "reference/admin-api-backend-reference/objects",
+            "reference/admin-api-backend-reference/scalars",
+            "reference/admin-api-backend-reference/enums",
+            "reference/admin-api-backend-reference/inputs",
+            "reference/admin-api-backend-reference/queries",
+            "reference/admin-api-backend-reference/mutations"
+          ]
+        },
+        "reference/client-sdk-frontend-reference"
+      ]
+    },
+    {
+      "group": "Non-Technical",
+      "pages": [
+        {
+          "group": "Features",
+          "pages": [
+            "non-technical/features/what-are-features",
+            "non-technical/features/create-new-features",
+            "non-technical/features/edit-an-existing-feature"
+          ]
+        },
+        {
+          "group": "Packages",
+          "pages": [
+            "non-technical/packages/what-are-packages",
+            "non-technical/packages/create-new-packages",
+            "non-technical/packages/edit-an-existing-package",
+            "non-technical/packages/publish-a-package"
+          ]
+        },
+        {
+          "group": "Integrations",
+          "pages": [
+            {
+              "group": "Stripe Integration",
+              "pages": [
+                "non-technical/integrations/stripe-integration",
+                "non-technical/integrations/stripe-integration/stripe-importation-and-sync-overview",
+                "non-technical/integrations/stripe-integration/import-subscriptions-from-stripe"
+              ]
+            },
+            {
+              "group": "Segment Integration",
+              "pages": [
+                "non-technical/integrations/segment-integration",
+                "non-technical/integrations/segment-integration/identify-users-segment",
+                "non-technical/integrations/segment-integration/track-feature-usage-segment",
+                "non-technical/integrations/segment-integration/track-feature-usage-segment/create-new-mapping-rules"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "classes": {
+    "topbarCtaButton": "relative inline-flex items-center px-5 py-0.5 shadow-sm text-sm font-semibold rounded-full text-slate-800 border-2 border-slate-900 bg-white shadow-[-3px_3px_0_black] dark:shadow-[-3px_3px_0_#ddd] hover:shadow-none dark:hover:shadow-none hover:mt-[3px] hover:ml-[-3px] hover:mr-[3px] duration-200"
+  }
+}

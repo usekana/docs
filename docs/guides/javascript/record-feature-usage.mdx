@@ -1,0 +1,118 @@
+---
+title: "Record Feature Usage"
+description: "Kana needs to know whenever a user of your product has used a feature. It's a requirement so that we have accurate information on what feature's customers have used (and by how much) within the package(s) they have subscribed to."
+---
+
+<Note>
+  You should implement this each time you create a feature within Kana to ensure
+  your user's usage of a feature is accurately recorded.
+</Note>
+
+## Prerequisites
+
+You will need to ensure you have details on both:
+
+- The **user** who has used the feature
+
+- The **feature** which the user has used
+
+If neither the user nor feature exist yet in Kana, then you should create these first:
+
+[Create Users](/guides/ruby/importing-and-creating/create-users)
+
+[Create Features](/guides/ruby/importing-and-creating/create-features)
+
+Once these are created, you will need to ensure you know the `id` of both.
+
+Both the`id` for a [User](/reference/admin-api-backend-reference/objects#user) and a [Feature](/reference/admin-api-backend-reference/objects#feature) are defined by you upon creation in Kana.
+
+You can find the identifiers for both in the [Dashboard](https://dashboard.usekana.com), or by using the [features](/reference/admin-api-backend-reference/queries#features) and [users](/reference/admin-api-backend-reference/queries#users) queries to pull all respective records and grab the `id `from the one you need.
+
+## Code Sample
+
+### Basic
+
+```javascript Node.js
+import { KanaAdmin } from "@usekana/admin-kana-js";
+
+const client = new KanaAdmin({
+  apiKey: API_KEY, // Replace with own Private API Key
+});
+
+const { data, error } = await client.features.recordUsage({
+  userId: "124",
+  featureId: "api-calls",
+  delta: "1",
+});
+console.log(data);
+console.log(error);
+```
+
+### Example
+
+```javascript Node.js
+import { KanaAdmin } from '@usekana/admin-kana-js';
+import { sendMessage } from '/modules/sendMessage.js'
+
+const userId = user.id; // Assumes there's a user object that's been fetched
+const featureId = 'messages' // Replace with your feature's identifier
+const delta = 1 // Defines the amount to send - function only sends 1 message
+
+const message = { text: "Hello", to: "user@gmail.com", from: "user@company.com" }
+
+sendMessage(message)
+  .then((result) => {
+    const client = new KanaAdmin({
+      apiKey: API_KEY // Replace with own Private API Key
+    });
+
+    const { data, error } = await kanaClient.features.recordUsage({
+      userId: userId,
+      featureId: featureId,
+      delta: 1
+    });
+
+    if (error) {
+      console.log(error);
+    } else if (data.recorded == false) {
+      console.log(`Kana feature usage not recorded for ${featureId}`);
+    };
+
+    console.log(result);
+  })
+  .catch((error) => {
+    console.log(error);
+});
+```
+
+<Note>
+  This should always take place **after the feature has been successfully
+  used.** Make the call when there is no possibility of error and the action
+  related to the feature has taken place. This will avoid any accidental
+  recording of usage when nothing has yet happened. You can always provide a
+  negative `delta` in a subsequent call to revert this if needed (more in
+  [recordUsage](/reference/admin-api-backend-reference/mutations#recordusage)).
+</Note>
+
+## Next Steps
+
+<Check>
+  **Congratulations** 🎉 You've now successfully tracked your user's usage of a
+  feature.
+</Check>
+
+You should look to ensure this is setup for all your features and in all places where those features could be used by customers. For instance, if you had a `messages` feature, your users may be able to send messages via your UI and through an API call - both should be tracked.
+
+As we now have details on how much of a feature a user has used, you can:
+
+- [Fetch insights on a user's current feature usage from our API](/reference/admin-api-backend-reference/queries#showusage)
+
+- Block usage based on if a user has no more remaining allowance
+
+- Subscribe a user to a new package based on their feature usage
+
+We strongly recommend following the guide on blocking customer usage next so that feature access is properly recorded and blocked when necessary.
+
+[Block Feature Access (Backend)](/guides/javascript/block-feature-access-backend)
+
+[Block Feature Access (Frontend)](/guides/javascript/block-feature-access-frontend)

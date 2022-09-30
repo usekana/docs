@@ -1,0 +1,1285 @@
+---
+title: "Mutations"
+---
+
+[Mutations](https://graphql.org/learn/queries/) define GraphQL operations which change data on the server. They are the primary way to take actions with your data in Kana. The majority of operations below require you to provide the fields you want returned after the mutation occurs - the same principles that apply to [Queries](/reference/admin-api-backend-reference/queries) apply here too.
+
+At the start of every mutation operation, ensure that you specify `mutation` before the field(s).
+
+<Note>
+#### Query Variables
+
+We use variables throughout our example requests. We do this in order to mirror real-world application practices whereby you would most likely want dynamic values for your arguments. [Take a look at this guide if you're unfamiliar with how variables work in GraphQL](https://graphql.org/learn/queries/#variables).
+
+</Note>
+
+## createFeature
+
+Create a [Feature](/reference/admin-api-backend-reference/objects#feature).
+
+### Arguments
+
+| Name    | Type                                                                                    | Description                                                                                                   |
+| ------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `input` | [CreateFeatureInput!](/reference/admin-api-backend-reference/inputs#createfeatureinput) | The input needed to create the feature. See [Inputs](/reference/admin-api-backend-reference/inputs) for more. |
+
+### Return Fields
+
+| Name               | Type                                                               | Description                                                                              |
+| ------------------ | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `data`             | [Feature!](/reference/admin-api-backend-reference/objects#feature) | The [Feature](/reference/admin-api-backend-reference/objects#feature) which was created. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)        | Returns any errors which may have occurred with the request.                             |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation createFeature($input: CreateFeatureInput!) {
+  createFeature(input: $input) {
+    id
+    name
+    type
+    unitLabel
+    unitLabelPlural
+    metadata
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "input": {
+    "id": "api-calls",
+    "name": "API Calls",
+    "type": "CONSUMABLE",
+    "unitLabel": "API Call",
+    "unitLabelPlural": "API Calls",
+    "metadata": {}
+  }
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "createFeature": {
+      "id": "api-calls",
+      "name": "API Calls",
+      "type": "CONSUMABLE",
+      "unitLabel": "API Call",
+      "unitLabelPlural": "API Calls",
+      "metadata": {}
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation createFeature($input: CreateFeatureInput!) { createFeature(input: $input) { id name type unitLabel unitLabelPlural metadata } }", "variables": "{\"input\":{\"id\":\"api-calls\",\"name\":\"API Calls\",\"type\":\"CONSUMABLE\",\"unitLabel\":\"API Call\",\"unitLabelPlural\":\"API Calls\",\"metadata\":{}}}" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.features.create({id: 'api-calls', name: 'API Calls', type: 'CONSUMABLE', unitLabel: 'API Call', unitLabelPlural: 'API Calls', metadata: {}});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## updateFeature
+
+Update a [Feature](/reference/admin-api-backend-reference/objects#feature).
+
+### Arguments
+
+| Name    | Type                                                                                    | Description                                                                                                   |
+| ------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `input` | [UpdateFeatureInput!](/reference/admin-api-backend-reference/inputs#updatefeatureinput) | The input needed to update the feature. See [Inputs](/reference/admin-api-backend-reference/inputs) for more. |
+
+### Return Fields
+
+| Name               | Type                                                               | Description                                                                              |
+| ------------------ | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `data`             | [Feature!](/reference/admin-api-backend-reference/objects#feature) | The [Feature](/reference/admin-api-backend-reference/objects#feature) which was updated. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)        | Returns any errors which may have occurred with the request.                             |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation updateFeature($input: UpdateFeatureInput!) {
+  updateFeature(input: $input) {
+    id
+    name
+    type
+    unitLabel
+    unitLabelPlural
+    metadata
+    packages {
+      id
+      name
+      status
+      isAddon
+      updatedAt
+      features {
+        id
+        name
+        type
+        limit
+        unitLabel
+        unitLabelPlural
+        metadata
+      }
+      prices {
+        id
+        provider
+        amount
+        displayAmount
+        currency
+        interval
+      }
+    }
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "id": "api-calls",
+  "input": {
+    "name": "API Calls",
+    "unitLabel": "API Call",
+    "unitLabelPlural": "API Calls",
+    "metadata": {}
+  }
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data":{
+    "updateFeature":{
+      "id":"api-calls",
+      "name":"API Calls",
+      "type":"CONSUMABLE",
+      "unitLabel": "API Call",
+      "unitLabelPlural": "API Calls",
+      "metadata":{},
+      "packages":[
+        {
+          "id":"pro-plan",
+          "name":"Pro Plan",
+          "status":"PUBLISHED",
+          "metadata":{},
+          "isAddon":false,
+          "updatedAt":"2022-05-10T12:39:08.965Z",
+          "features":[
+            {
+              "id":"api-calls",
+              "name":"API Calls",
+              "limit":"1000",
+              "type":"CONSUMABLE"
+              "unitLabel": "API Call",
+              "unitLabelPlural": "API Calls",
+              "metadata":{}
+            }
+          ],
+          "prices":[
+            {
+              "id": "price_1L7NHvIiEnRX8aivoxbSWREF",
+              "provider": "STRIPE",
+              "amount": 5000,
+              "displayAmount": "50.00",
+              "currency": "gbp",
+              "interval": "month"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation updateFeature($input: UpdateFeatureInput!) { updateFeature(input: $input) { id name type unitLabel unitLabelPlural metadata packages { id name status isAddon updatedAt features { id name type limit unitLabel unitLabelPlural metadata } prices { id provider amount displayAmount currency interval } } } }", "variables": "{\"id\":\"api-calls\",\"input\":{\"name\":\"API Calls\",\"unitLabel\":\"API Call\",\"unitLabelPlural\":\"API Calls\",\"metadata\":{}}}" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.features.update({id: 'api-calls', input: { name: 'API Calls', unitLabel: 'API Call', unitLabelPlural: 'API Calls', metadata: {} }});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## createPackage
+
+Create a [Package](/reference/admin-api-backend-reference/objects#package).
+
+<Note>
+**Package Status**
+
+Your package will always have a status of DRAFT upon being created. If you want to publish this package then you will have to do so through the [Dashboard](https://dashboard.usekana.com).
+
+</Note>
+
+### Arguments
+
+| Name    | Type                                                                                    | Description                                                                                                   |
+| ------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `input` | [CreatePackageInput!](/reference/admin-api-backend-reference/inputs#createpackageinput) | The input needed to create the package. See [Inputs](/reference/admin-api-backend-reference/inputs) for more. |
+
+### Return Fields
+
+| Name               | Type                                                                   | Description                                                                              |
+| ------------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `data`             | [**Package!**](/reference/admin-api-backend-reference/objects#package) | The [Package](/reference/admin-api-backend-reference/objects#package) which was created. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)            | Returns any errors which may have occurred with the request.                             |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation createPackage($input: CreatePackageInput!) {
+  createPackage(input: $input) {
+    id
+    name
+    status
+    metadata
+    features {
+      id
+      name
+      limit
+      type
+      unitLabel
+      unitLabelPlural
+      metadata
+    }
+    prices {
+      id
+      provider
+      amount
+      displayAmount
+      currency
+      interval
+    }
+    isAddon
+    updatedAt
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "input": {
+    "id": "pro-plan",
+    "name": "Pro Plan",
+    "isAddon": false,
+    "metadata": {},
+    "features": {
+      "id": "api-calls",
+      "entitlement": {
+        "limit": 1000,
+        "resetPeriod": "MONTH",
+        "overageEnabled": false
+      }
+    }
+  }
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "createPackage": {
+      "id": "pro-plan",
+      "name": "Pro Plan",
+      "status": "DRAFT",
+      "metadata": {},
+      "features": [
+        {
+          "id": "api-calls",
+          "name": "API Calls",
+          "limit": "1000",
+          "type": "CONSUMABLE",
+          "unitLabel": "API Call",
+          "unitLabelPlural": "API Calls",
+          "metadata": {}
+        }
+      ],
+      "prices": [
+        {
+          "id": "price_1L7NHvIiEnRX8aivoxbSWREF",
+          "provider": "STRIPE",
+          "amount": 5000,
+          "displayAmount": "50.00",
+          "currency": "gbp",
+          "interval": "month"
+        }
+      ],
+      "isAddon": false,
+      "updatedAt": "2021-11-25T16:57:42.778Z"
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation createPackage($input: CreatePackageInput!) { createPackage(input: $input) { id name status metadata features { id name limit type unitLabel unitLabelPlural metadata } prices { id provider amount displayAmount currency interval } isAddon updatedAt }}", "variables": "{"input":{"id":"pro-plan","name":"Test User","isAddon":false,"metadata":{},"features":{"id":"api-calls","entitlement":{"limit":1000,"resetPeriod":"MONTH","overageEnabled":false}}}}" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.users.create({id: '124', name: 'Pro Plan', isAddon: false, metadata: {}, features: { id: 'api-calls', entitlement: { limit: 1000, resetPeriod: "MONTH", overageEnabled: false }}});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## updatePackage
+
+Update a [Package](/reference/admin-api-backend-reference/objects#package).
+
+<Warning>
+Only `metadata` can be updated on the Package object through the API. All other updates will need to be done through the [Dashboard](https://dashboard.usekana.com). Let us know if you want to see further updatable fields and your use-cases!
+
+</Warning>
+
+### Arguments
+
+| Name    | Type                                                                                    | Description                                                                                                   |
+| ------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `input` | [UpdatePackageInput!](/reference/admin-api-backend-reference/inputs#updatepackageinput) | The input needed to update the package. See [Inputs](/reference/admin-api-backend-reference/inputs) for more. |
+
+### Return Fields
+
+| Name               | Type                                                               | Description                                                                              |
+| ------------------ | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `data`             | [Package!](/reference/admin-api-backend-reference/objects#package) | The [Package](/reference/admin-api-backend-reference/objects#package) which was updated. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)        | Returns any errors which may have occurred with the request.                             |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation updatePackage($input: UpdatePackageInput!) {
+  updatePackage(input: $input) {
+    id
+    name
+    status
+    metadata
+    features {
+      id
+      name
+      limit
+      type
+      unitLabel
+      unitLabelPlural
+      metadata
+    }
+    prices {
+      id
+      provider
+      amount
+      displayAmount
+      currency
+      interval
+    }
+    isAddon
+    updatedAt
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "id": "pro-plan",
+  "input": {
+    "metadata": {}
+  }
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "updatePackage": {
+      "id": "pro-plan",
+      "name": "Pro Plan",
+      "status": "DRAFT",
+      "metadata": {},
+      "features": [
+        {
+          "id": "api-calls",
+          "name": "API Calls",
+          "limit": "1000",
+          "type": "CONSUMABLE",
+          "unitLabel": "API Call",
+          "unitLabelPlural": "API Calls",
+          "metadata": {}
+        }
+      ],
+      "prices": [
+        {
+          "id": "price_1L7NHvIiEnRX8aivoxbSWREF",
+          "provider": "STRIPE",
+          "amount": 5000,
+          "displayAmount": "50.00",
+          "currency": "gbp",
+          "interval": "month"
+        }
+      ],
+      "isAddon": false,
+      "updatedAt": "2021-11-25T16:57:42.778Z"
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation updatePackage($input: UpdatePackageInput!) { updatePackage(input: $input) { id name status metadata features { id name limit type unitLabel unitLabelPlural metadata } prices { id provider amount displayAmount currency interval } isAddon updatedAt }}", "variables": "{ \"input\": { \"metadata\": {}}}" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.packages.update({id: 'pro-plan', input: { metadata: {} }});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## createUser
+
+Create a [User](/reference/admin-api-backend-reference/objects#user).
+
+### Arguments
+
+| Name    | Type                                                                                  | Description                                                                                                |
+| ------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `input` | [**CreateUserInput!**](/reference/admin-api-backend-reference/inputs#createuserinput) | The input needed to create the user. See [Inputs](/reference/admin-api-backend-reference/inputs) for more. |
+
+### Return Fields
+
+| Name               | Type                                                             | Description                                                                        |
+| ------------------ | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `data`             | [**User!**](/reference/admin-api-backend-reference/objects#user) | The [User](/reference/admin-api-backend-reference/objects#user) which was created. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)      | Returns any errors which may have occurred with the request.                       |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation createUser($input: CreateUserInput!) {
+  createUser(input: $input) {
+    id
+    billingId
+    name
+    email
+    metadata
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "input": {
+    "id": "124",
+    "billingId": "cus_883y74hdjjdjdnd",
+    "name": "Test User",
+    "email": "test@usekana.com",
+    "metadata": {}
+  }
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "createUser": {
+      "id": "124",
+      "billingId": "cus_883y74hdjjdjdnd",
+      "name": "Test User",
+      "email": "test@usekana.com",
+      "metadata": {}
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation createUser($input: CreateUserInput!) { createUser(input: $input) { id billingId name email } }", "variables": "{ \"input\": { \"id\": \"124\", \"name\": \"Test User\", \"email\": \"test@usekana.com\", \"billingId\": \"cus_883y74hdjjdjdnd\" } }" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.users.create({id: '124', billingId: 'cus_883y74hdjjdjdnd', name: 'Test User', email: 'test@usekana.com'});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## updateUser
+
+Update a [User](/reference/admin-api-backend-reference/objects#user).
+
+<Note>
+**How can I update the email or billingId of a user?**
+
+You will need to do this through a CSV Import within our [Dashboard](https://dashboard.usekana.com). We'll soon make this possible through the API.
+
+</Note>
+
+### Arguments
+
+| Name    | Type                                                                              | Description                                                                                                |
+| ------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `input` | [UpdateUserInput!](/reference/admin-api-backend-reference/inputs#updateuserinput) | The input needed to update the user. See [Inputs](/reference/admin-api-backend-reference/inputs) for more. |
+
+### Return Fields
+
+| Name               | Type                                                             | Description                                                                        |
+| ------------------ | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `data`             | [**User!**](/reference/admin-api-backend-reference/objects#user) | The [User](/reference/admin-api-backend-reference/objects#user) which was updated. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)      | Returns any errors which may have occurred with the request.                       |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation updateUser($id: String!, $input: CreateUserInput!) {
+  updateUser(id: $id, input: $input) {
+    id
+    billingId
+    name
+    email
+    metadata
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "id": "124",
+  "input": {
+    "id": "125",
+    "name": "Updated User",
+    "metadata": {}
+  }
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "createUser": {
+      "id": "125",
+      "billingId": "cus_883y74hdjjdjdnd",
+      "name": "Updated User",
+      "email": "test@usekana.com",
+      "metadata": {}
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation updateUser($id: String!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { id billingId name email } }", "variables": "{ "\id\": \"124\", \"input\": { \"id\": \"125\", \"name\": \"Updated User\" } }" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.users.update('124', { id: '125', name: 'Updated User' });
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## subscribe
+
+Subscribe a [User](/reference/admin-api-backend-reference/objects#user) to a [Package](/reference/admin-api-backend-reference/objects#package) \- either one or multiple. Returns a [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription).
+
+Users can only be subscribed to a [Package](/reference/admin-api-backend-reference/objects#package) with a status of `PUBLISHED`.
+
+### Arguments
+
+| Name         | Type                                                               | Description                                                                                                                                                               |
+| ------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packageIds` | [\[String!\]!](/reference/admin-api-backend-reference/scalars#int) | An array of id's for the packages which the user is to be subscribed to. These are the `id` fields of a[Package](/reference/admin-api-backend-reference/objects#package). |
+| `userId`     | [String!](/reference/admin-api-backend-reference/scalars#string)   | The identifier of the user to subscribe the package(s) to. This maps to the `id` field as set on the [User](/reference/admin-api-backend-reference/objects#user) object.  |
+
+### Return Fields
+
+| Name               | Type                                                                             | Description                                                                                       |
+| ------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `data`             | [\[Subscription\]!](/reference/admin-api-backend-reference/objects#subscription) | An array of subscriptions to the packages which the user in question has just been subscribed to. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)                      | Returns any errors which may have occurred with the request.                                      |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation subscribeUserToPlan($packageIds: [String!]!, $userId: String!) {
+  subscribe(packageIds: $packageIds, userId: $userId) {
+    id
+    userId
+    status
+    package {
+      id
+      name
+      status
+      metadata
+      features {
+        id
+      	name
+        limit
+        type
+        unitLabel
+        unitLabelPlural
+        metadata
+      }
+      prices {
+        id
+        provider
+        amount
+        displayAmount
+        currency
+        interval
+      }
+      isAddon
+      updatedAt
+    }
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "packageIds": ["free-trial", "proactive-messaging"],
+  "userId": "124"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "subscribe": [
+      {
+        "id": "2",
+        "userId": "124",
+        "status": "ACTIVE",
+        "metadata": {},
+        "package": {
+          "id": "free-trial",
+          "name": "Free Trial",
+          "status": "PUBLISHED",
+          "metadata": {},
+          "features": [
+            {
+              "id": "api-calls",
+              "name": "API Calls",
+              "limit": "1000",
+              "type": "CONSUMABLE",
+              "unitLabel": "API Call",
+              "unitLabelPlural": "API Calls",
+              "metadata": {}
+            }
+          ],
+          "prices": [
+            {
+              "id": "price_1L7NHvIiEnRX8aivoxbSWREF",
+              "provider": "STRIPE",
+              "amount": 5000,
+              "displayAmount": "50.00",
+              "currency": "gbp",
+              "interval": "month"
+            }
+          ],
+          "isAddon": false,
+          "updatedAt": "2021-11-25T16:57:42.778Z"
+        }
+      },
+      {
+        "id": "3",
+        "userId": "124",
+        "status": "CANCELLED",
+        "package": {
+          "id": "proactive-messaging",
+          "name": "Proactive Messaging",
+          "status": "PUBLISHED",
+          "metadata": {},
+          "features": [
+            {
+              "id": "messages",
+              "name": "Messages",
+              "limit": "50",
+              "type": "CONSUMABLE",
+              "unitLabel": "Message",
+              "unitLabelPlural": "Message",
+              "metadata": {}
+            }
+          ],
+          "prices": [
+            {
+              "id": "price_id_6gSGwU839shamnskk7LSNME",
+              "provider": "STRIPE",
+              "amount": 2000,
+              "displayAmount": "20.00",
+              "currency": "gbp",
+              "interval": null
+            }
+          ],
+          "isAddon": true,
+          "updatedAt": "2021-11-27T18:25:10.081Z"
+        }
+      }
+    ]
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation subscribeUserToPackage($packageIds: [String!]!, $userId: String!) { subscribe(packageIds: $packageIds, userId: $userId) { id userId status package { id name status metadata features { id name limit type unitLabel unitLabelPlural metadata } prices { id provider amount displayAmount currency interval } isAddon updatedAt } } }", "variables": "{ \"packageIds\": [ \"free-plan\", \"proactive-messaging\" ], \"userId\": \"124\" } " }'
+
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const packageIds = ['free-plan', 'proactive-messaging']
+
+const { data, error } = await client.subscriptions.create({packageIds: packageIds, userId: '124'});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+### Errors
+
+<AccordionGroup>
+<Accordion title="Cannot subscribe to addon">
+
+#### Why?
+
+A user is being subscribed to an Add-on plan, but is not subscribed yet to a base (ie. live) plan.
+
+#### **Solution**
+
+Subscribe the user to a base (or live) plan before, or during, this call. The `isAddon` field for the [plan](/reference/admin-api-backend-reference/objects#plan) object must be `false`. You can check existing Plans with the [plans](/reference/admin-api-backend-reference/queries#plans) query.
+
+#### Example
+
+```json
+{
+  "message": "Cannot subscribe to addon. Missing live tier subscription.",
+  "locations": [
+    {
+      "line": 2,
+      "column": 3
+    }
+  ],
+  "path": ["subscribe"],
+  "extensions": {
+    "code": "BAD_USER_INPUT"
+  }
+}
+```
+
+</Accordion>
+<Accordion title="Cannot subscribe to multiple tiers">
+
+#### Why?
+
+A user is being subscribed to multiple base plans (ie. tiers) within the mutation, or is already subscribed to a base plan.
+
+#### **Solution**
+
+Ensure there's only one base plan in the mutation, or check that the user is not already subscribed to a base plan with the [subscription](/reference/admin-api-backend-reference/queries#subscription) query. The `isAddon` field for the [Package](/reference/admin-api-backend-reference/objects#package) object will be `false` if it's a base plan. You can check Packages with the [packages](/reference/admin-api-backend-reference/queries#packages) query.
+
+#### Example
+
+```json
+{
+  "message": "Cannot subscribe to multiple tiers",
+  "locations": [
+    {
+      "line": 2,
+      "column": 3
+    }
+  ],
+  "path": ["subscribe"],
+  "extensions": {
+    "code": "BAD_USER_INPUT"
+  }
+}
+```
+
+</Accordion>
+<Accordion title="Package Id not found for app">
+
+```json
+{
+  "message": "Package Id not found for app",
+  "locations": [
+    {
+      "line": 2,
+      "column": 3
+    }
+  ],
+  "path": ["subscribe"],
+  "extensions": {
+    "code": "BAD_USER_INPUT"
+  }
+}
+```
+
+</Accordion>
+</AccordionGroup>
+
+## recordUsage
+
+Records the usage of a [Feature](/reference/admin-api-backend-reference/objects#feature) by a [User](/reference/admin-api-backend-reference/objects#user), including the amount it was used by.
+
+<Note>
+**Revert Usage**
+
+If you want to revert usage by a certain amount (ie. subtract rather than add from the usage of a feature), you can do so by providing a negative amount in the `delta `argument (ie. `-1`).
+
+</Note>
+
+### Arguments
+
+| Name  | Type                                                                                          | Description                                                                                                       |
+| ----- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| input | [CreateUsageEventInput!](/reference/admin-api-backend-reference/inputs#createusageeventinput) | The input needed to record the usage event. See [Inputs](/reference/admin-api-backend-reference/inputs) for more. |
+
+### Return Fields
+
+| Name               | Type                                                                          | Description                                                                                                                 |
+| ------------------ | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `data`             | [RecordedUsage](/reference/admin-api-backend-reference/objects#recordedusage) | An object containing information on whether the usage of the feature was recorded or not (`recorded` boolean and `reason`). |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)                   | Returns any errors which may have occurred with the request.                                                                |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation recordUsage($input: CreateUsageEventInput!) {
+  recordUsage(input: $input) {
+    recorded
+    reason
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "input": {
+    "userId": "124",
+    "featureId": "api-calls",
+    "delta": 100,
+    "action": "SET"
+  }
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "recordUsage": {
+      "recorded": true,
+      "reason": null
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation recordUsage($input: CreateUsageEventInput!) { recordUsage(input: $input) { recorded reason } }", "variables": "{ \"input\": { \"userId\": \"124\", \"featureId\": \"api-calls\", \"delta\": 100, \"action\": \"SET\" } }" }'
+
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const { data, error } = await client.features.recordUsage({userId: '124', featureId: 'api-calls', delta: 100, action: 'SET'});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
+
+## generateSubscriptionLinks
+
+Generate a [payment link](https://stripe.com/docs/payments/payment-links) which a user can navigate to in order to pay and subscribe to a [Package](/reference/admin-api-backend-reference/objects#package).
+
+<Warning>
+  A billing template (which has a price associated to it) **must** be created
+  and linked to the package you want a user to subscribe to. You can do so in
+  the [Dashboard](https://dashboard.usekana.com). You will need to provide a
+  valid `templateId` \- otherwise a`SubscriptionLinkError` error will be
+  returned.
+</Warning>
+
+<Note>
+  Upon successful payment, we will automatically receive notification of the
+  user and the packages they have subscribed to in order to create
+  [PackageSubscription](/reference/admin-api-backend-reference/objects#packagesubscription)**s**.
+  You do **not** need to notify Kana (ie. through the
+  [subscribe](/reference/admin-api-backend-reference/mutations#subscribe)
+  mutation) yourself.
+</Note>
+
+### Arguments
+
+| Name         | Type                                                             | Description                                                                                                                                                                                                                                                                        |
+| ------------ | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `userId`     | [String](/reference/admin-api-backend-reference/scalars#string)  | The identifier of the user who will be subscribing. This maps to the `id` field as set on the [User](/reference/admin-api-backend-reference/objects#user) object. Your billing provider will otherwise create this user in Kana for you if you don't have an identifier available. |
+| `templateId` | [String!](/reference/admin-api-backend-reference/scalars#string) | The identifier of the billing template which is related to the package and price which you want to subscribe the user to.                                                                                                                                                          |
+| `successUrl` | [String!](/reference/admin-api-backend-reference/scalars#string) | The URL which you want to redirect users to upon successful payment to subscribe.                                                                                                                                                                                                  |
+| `cancelUrl`  | [String!](/reference/admin-api-backend-reference/scalars#string) | The URL which you want to redirect users to upon a cancelled payment to subscribe.                                                                                                                                                                                                 |
+
+### Returns
+
+| Name               | Type                                                                                 | Description                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `data`             | [SubscriptionLink!](/reference/admin-api-backend-reference/objects#subscriptionlink) | An object containing the generated URL (`url`) which a user can navigate to in order to pay and subscribe to a package. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)                          | Returns any errors which may have occurred with the request.                                                            |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation generateSubscriptionLink($userId: String, $templateId: String!, $successUrl: String!, $cancelUrl: String!) {
+  generateSubscriptionLink(userId: $userId, templateId: $templateId, successUrl: $successUrl, cancelUrl: $cancelUrl) {
+    url
+  }
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "userId": "124",
+  "templateId": "pro-50gbp-month",
+  "successUrl": "https://usekana.com/pricing/success",
+  "cancelUrl": "https://usekana.com/pricing/cancelled"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "generateSubscriptionLink": {
+      "url": "https://checkout.stripe.com/pay/cs_test_a1l1XbatH0jyo4PBOr2ZUdzSZYjgTevA6B1feZIloI8Wv0jWLDE6JTsgre#fidkdWxOYHwnPyd1blpxYHZxWjA0TkJsMlJCbWhMT2Y8QjI3bnZVajVsVWtWQzU3Z0BufHdpdEBTb11GdH00V0xNdlFsSXxqVjRGTXFCRlxsXzxSNWw0XWNRQ2ljclBTR1Q8XEBLMXBkV3ZDNTVRRGZAbDZ1cycpJ2N3amhWYHdzNHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYCkndnF3bHVgRGZmanBrcSc%2FL2RmZnFaNE50TXVuTXxWVGowPUF2byd4JSUn"
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation generateSubscriptionLink($userId: String, $templateId: String!, $successUrl: String!, $cancelUrl: String!) { generateSubscriptionLink(userId: $userId, templateId: $templateId, successUrl: $successUrl, cancelUrl: $cancelUrl) { url } }", "variables": "{ \"userId\": \"124\", \"templateId\": \"pro-50gbp-month\", \"successUrl\":\"https://usekana.com/pricing/success\",\"cancelUrl\": \"https://usekana.com/pricing/cancelled\" }" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+// Not yet available in SDKs
+// We're working on this currently - stay tuned!
+```
+
+</Tab>
+</Tabs>
+
+## generateUserToken
+
+Generates a user-specific token for the client-side [Client SDK (Frontend)](/client-sdk-frontend). You can find out more in our [Authorization (Frontend)](/client-sdk-frontend/authorization-frontend) guide.
+
+### Arguments
+
+| Name   | Type                                                             | Description                                                                                                       |
+| ------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| userId | [String!](/reference/admin-api-backend-reference/scalars#string) | The id of the [User](/reference/admin-api-backend-reference/objects#user) who you want to generate the token for. |
+
+### Return Fields
+
+| Name               | Type                                                                                        | Description                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `data`             | [**GeneratedUserToken**](/reference/admin-api-backend-reference/objects#generatedusertoken) | An object containing the `token` which can be used to authenticate a user with the Client SDK. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)                                 | Returns any errors which may have occurred with the request.                                   |
+
+### Examples
+
+<Tabs>
+<Tab title="Request/Response">
+
+#### Request Body
+
+```javascript
+mutation generateUserToken($userId: String!) {
+  generateUserToken(userId: $userId)
+}
+```
+
+#### Request Query Variables
+
+```json
+{
+  "userId": "124"
+}
+```
+
+**Response JSON**
+
+```json
+{
+  "data": {
+    "generateUserToken": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpLOPTE.eyJhcFAKERI6InRlc3RfZmhqZGlqaHMiLCJ1c2VySWQiOiIxMjQiLCJpYXQiOjE2NTIyNjI4MTUsImV4cCI6MTY1NDg1NDgxNSwiYXVkIjoia2FuYS1jbGllbnQiLCJpc3MiOiJ1c2VrYW5hLmNvbSJ9.hD3NeQlykA7ucCvbLp3bYEHye23zlca85yhq1s2C6a8"
+    }
+  }
+}
+```
+
+</Tab>
+<Tab title="cURL">
+
+```bash
+curl https://api.usekana.com/graphql \
+-X POST \
+-H "Authorization: INSERT_API_KEY" \
+-H "Content-Type:application/json" \
+-d '{ "query": "mutation generateUserToken($userId: String!) { generateUserToken(userId: $userId) { token } }", "variables": "{ \"userId\": \"124\" }" }'
+```
+
+</Tab>
+<Tab title="Node.js">
+
+```javascript
+import { KanaAdmin } from '@usekana/admin-kana-js'; \
+
+const client = new KanaAdmin({
+    apiKey: API_KEY // Replace with own Private API Key
+});
+
+const packageIds = ['free-plan', 'proactive-messaging']
+
+const { data, error } = await client.users.generateToken({userId: '124'});
+console.log(data);
+console.log(error);
+```
+
+</Tab>
+</Tabs>
