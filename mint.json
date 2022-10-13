@@ -174,5 +174,8 @@
   ],
   "classes": {
     "topbarCtaButton": "relative inline-flex items-center px-5 py-0.5 shadow-sm text-sm font-semibold rounded-full text-slate-800 border-2 border-slate-900 bg-white shadow-[-3px_3px_0_black] dark:shadow-[-3px_3px_0_#ddd] hover:shadow-none dark:hover:shadow-none hover:mt-[3px] hover:ml-[-3px] hover:mr-[3px] duration-200"
+  },
+  "integrations": {
+    "intercom": "iotthysq"
   }
 }
