@@ -110,6 +110,12 @@
       ]
     },
     {
+      "group": "CLI",
+      "pages": [
+        "cli"
+      ]
+    },
+    {
       "group": "Reference",
       "pages": [
         {
