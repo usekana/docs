@@ -17,7 +17,7 @@ We'll walk through an example flow of how to obtain and provide this successfull
 
 ### 1. Gain details on the user
 
-You will need to ensure you have details on the **user** who you want to make calls for. Namely, you will need to have an identifier which maps to the `id` in Kana.
+You will need to ensure you have details on the [User](/reference/admin-api-backend-reference/objects#user) who you want to make calls for. Namely, you will need to have an identifier which maps to the `id` in Kana.
 
 <Note>
 The `id` for a [User](/reference/admin-api-backend-reference/objects#user) is defined by you upon creation in Kana.
@@ -108,7 +108,7 @@ It's up to you on how and when you want to achieve this, but we've provided some
 
 On the client-side, we have the following function available which attempts to make a `POST` request to the `/kana/token` endpoint we setup earlier:
 
-```javascript Client
+```javascript Javascript
 async function grabKanaToken(user) {
   const userId = user.kanaId;
   try {

@@ -10,7 +10,7 @@ description: "The Kana CLI is a command-line interface making it easy for engine
 Run the following command in your terminal to install the package globally:
 
 ```bash
-npm install -g @usekana/cli 
+npm install -g @usekana/cli
 ```
 
 ### 2. Add API Keys
@@ -22,13 +22,20 @@ KANA_DEV_KEY="prv_test_..."
 KANA_LIVE_KEY="prv_live_..."
 ```
 
-HINT: Click on the ‘Live environment’ toggle in the upper right hand corner of the dashboard to switch environments. The dashboard primary colour will be purple when development and green when live.
+<Note>
+  Click on the ‘Live environment’ toggle in the upper right hand corner of the
+  dashboard to switch environments. The dashboard primary colour will be purple
+  when development and green when live.
+</Note>
 
 ### 3. Setup your YAML file
 
 The YAML file is the source of truth for your pricing and packaging configurations where you can see and define all your packages and features. How to initially set this upon will vary based on if you already have packages and features setup previously in Kana.
 
-HINT: The generated Kana YAML configuration files will sit within a `kana` folder in your repository.
+<Note>
+  The generated Kana YAML configuration files will sit within a `kana` folder in
+  your repository.
+</Note>
 
 #### Existing configuration
 
@@ -56,37 +63,37 @@ Add or edit the packages and features within the YAML file with the correct nest
 
 On the top-level of the YAML file.
 
-| Field | Description |
-| --- | --- |
+| Field   | Description                                                                                                            |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- |
 | version | The version of the configuration for experimentation or if you have multiple pricing models. Not functional currently. |
-| updated | The time when the configuration was last updated. |
-| project | The identifier of the workspace within Kana. |
+| updated | The time when the configuration was last updated.                                                                      |
+| project | The identifier of the workspace within Kana.                                                                           |
 
 #### Features
 
 Starts with `features`.
 
-| Field | Description |
-| --- | --- |
-| id | The identifier of the feature. |
-| name | The name of the feature. |
-| type | The type of the feature. Can be either BINARY or CONSUMABLE. |
+| Field | Description                                                  |
+| ----- | ------------------------------------------------------------ |
+| id    | The identifier of the feature.                               |
+| name  | The name of the feature.                                     |
+| type  | The type of the feature. Can be either BINARY or CONSUMABLE. |
 
 #### Packages
 
 Starts with `packages` and the status of the package. This can be `draft` or `published`.
 
-| Field | Description |
-| --- | --- |
-| id | The identifier of the package. |
-| name | The name of the package. |
+| Field    | Description                                                                                                                                    |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| id       | The identifier of the package.                                                                                                                 |
+| name     | The name of the package.                                                                                                                       |
 | features | The features within the package. Can have an id which corresponds to that in ‘Features’ and a limit if the type of that feature is CONSUMABLE. |
 
 #### Example
 
 ```yaml
 version: 1.0.0
-  
+
 # Updated: Fri Oct 14 2022 13:57:25 GMT+0100 (Irish Standard Time)
 
 # PROJECT: testApp123
