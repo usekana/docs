@@ -4,21 +4,35 @@ title: "Overview"
 
 ### GraphiQL IDE
 
-[You can utilise an interactive instance of the GraphQL API here.](https://api.usekana.com/graphql.)
+Play around with our GraphQL playground in real-time:
+
+<Card
+  title="GraphQL Interactive Playground"
+  icon={solid("chart-network")}
+  href="https://api.usekana.com/graphql"
+>
+</Card>
 
 ### SDKs
 
 We provide SDKs which make it easier for you to use the functionalities of the API in the languages that you use. Here's what's currently available:
 
-- [Node.js](https://github.com/usekana/admin-kana-js)
+<CardGroup>
+<Card
+  title="Node.js"
+  icon={brands("node-js")}
+  href="https://github.com/usekana/admin-kana-js"
+>
+</Card>
+</CardGroup>
 
 You can install these SDKs like so:
 
-```javascript Node
+```javascript Node.js
 // CLI
 npm i @usekana/admin-kana-js
 
-// package.json - Ensure the following is present:
+// package.json - ensure the following is present:
 "dependencies": {
     "@usekana/admin-kana-js": "^0.1.14"
 }
@@ -54,7 +68,7 @@ curl https://api.usekana.com/graphql \
 
 </Tab>
 
-<Tab title="Node">
+<Tab title="Node.js">
 
 You'll need to initialize the KanaAdmin client with the API Key passed as an `apiKey` argument. The Node.js library will then automatically send this key in each request.
 

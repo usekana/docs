@@ -27,7 +27,7 @@ Retrieve a [Feature](/reference/admin-api-backend-reference/objects#feature).
 
 | Name               | Type                                                                   | Description                                                                                                 |
 | ------------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `data`             | [**Feature!**](/reference/admin-api-backend-reference/objects#feature) | The [Feature](/reference/admin-api-backend-reference/objects#feature) corresponding to the `id` you passed. |
+| `data`             | [Feature!](/reference/admin-api-backend-reference/objects#feature) | The [Feature](/reference/admin-api-backend-reference/objects#feature) corresponding to the `id` you passed. |
 | `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)            | Returns any errors which may have occurred with the request.                                                |
 
 ### Examples
@@ -605,7 +605,7 @@ List all [Packages](/reference/admin-api-backend-reference/objects#package).
 | Name               | Type                                                                    | Description                                                  |
 | ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------ |
 | `data`             | [\[Package!\]!](/reference/admin-api-backend-reference/objects#package) | An array of all packages.                                    |
-| `errors` / `error` | See[Errors](/reference/admin-api-backend-reference#errors)              | Returns any errors which may have occurred with the request. |
+| `errors` / `error` | See [Errors](/reference/admin-api-backend-reference#errors)              | Returns any errors which may have occurred with the request. |
 
 ### Examples
 
@@ -645,8 +645,6 @@ query listPackages($status: String!) {
   }
 }
 ```
-
----
 
 #### Request Query Variables
 
@@ -983,8 +981,6 @@ query retrieveSubscription($id: String!) {
 }
 ```
 
----
-
 #### Request Query Variables
 
 ```json
@@ -1124,8 +1120,6 @@ query listSubscriptions($userId: String!) {
   }
 }
 ```
-
----
 
 #### Request Query Variables
 
