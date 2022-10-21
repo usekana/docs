@@ -35,7 +35,16 @@ You can either select:
 
 - **Property path:** The name of a property sent in the Segment track event (all fields within the `properties` object). We require both the key of the property and the value of that property. The name can be a path if it's nested in an object, such as `object.name`.
 
-[You can see more on what a Segment track event looks like in the Segment docs.](https://segment.com/docs/connections/spec/track/)
+<Card
+  title="Segment Track Event Spec"
+  icon={solid("up-right-from-square")}
+  href="https://segment.com/docs/connections/spec/track/"
+>
+  See more on what a Segment track event looks like in the Segment docs.
+</Card>
+
+
+
 
 If you need to add more conditions then hit the _'+'_ button next to an existing condition.
 
@@ -63,14 +72,22 @@ We have a consumable feature named 'Add-on Packages' which this event correspond
 ## What next?
 
 <Check>
-**Congratulations** 🎉 You've created a package in Kana.
+**Congratulations** 🎉 You've created a rule to map a Segment event to a feature.
 
 </Check>
 
 Send in track events from Segment which match this rule and they will record feature usage for the given feature automatically!
 
-[Track Feature Usage (Segment)](/non-technical/integrations/segment-integration/track-feature-usage-segment)
+<Card
+  title="Track Feature Usage (Segment)"
+  icon={solid("train-track")}
+  href="/non-technical/integrations/segment-integration/track-feature-usage-segment"
+/>
 
-**I still see rules in the table which should have matched - is this expected?**Although the rule has now been created, it may take some time to reprocess your existing events against this rule. You may need to refresh the page and/or wait up to an hour to see these reflected - although times may vary based on how many events need to be processed.
+<Note>
+**I still see rules in the table which should have matched - is this expected?**
+
+Although the rule has now been created, it may take some time to reprocess your existing events against this rule. You may need to refresh the page and/or wait up to an hour to see these reflected - although times may vary based on how many events need to be processed.
 
 If you see still see events that you think should have matched a rule after this, please write into the team and we'll take a deeper look!
+</Note>
