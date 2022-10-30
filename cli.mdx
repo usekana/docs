@@ -1,0 +1,181 @@
+---
+title: "Overview"
+description: "The Kana CLI is a command-line interface making it easy for engineers to review and update pricing and entitlement configurations programmatically. It allows you to define Kana packages and features through code without initial dashboard setup, reducing the friction to get started with Kana."
+---
+
+## How to setup
+
+### 1. Install
+
+Run the following command in your terminal to install the package globally:
+
+```bash
+npm install -g @usekana/cli
+```
+
+### 2. Add API Keys
+
+Find your private Admin (Backend) API Keys in the Dashboard. You will need both the development and live environment API Keys. Add these to a `.env` file in your project like so:
+
+```bash
+KANA_DEV_KEY="prv_test_..."
+KANA_LIVE_KEY="prv_live_..."
+```
+
+<Note>
+  Click on the ‘Live environment’ toggle in the upper right hand corner of the
+  dashboard to switch environments. The dashboard primary colour will be purple
+  when development and green when live.
+</Note>
+
+### 3. Setup your YAML file
+
+The YAML file is the source of truth for your pricing and packaging configurations where you can see and define all your packages and features. How to initially set this upon will vary based on if you already have packages and features setup previously in Kana.
+
+<Note>
+  The generated Kana YAML configuration files will sit within a `kana` folder in
+  your repository.
+</Note>
+
+#### Existing configuration
+
+If you already have packages and features setup, run the following in the root directory of your project to autogenerate the `./kana/kana.dev.yaml` file with your existing configuration:
+
+```bash
+kana pull
+```
+
+#### New configuration
+
+If you’re getting started for the first time without prior setup, run the following in the root directory of your project to generate an example  `./kana/kana.dev.yaml` file:
+
+```bash
+kana bootstrap
+```
+
+## How to make changes
+
+### 1. Edit the YAML file
+
+Add or edit the packages and features within the YAML file with the correct nesting and all necessary fields. The potential nestings/fields are:
+
+#### File
+
+On the top-level of the YAML file.
+
+| Field   | Description                                                                                                            |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| version | The version of the configuration for experimentation or if you have multiple pricing models. Not functional currently. |
+| updated | The time when the configuration was last updated.                                                                      |
+| project | The identifier of the workspace within Kana.                                                                           |
+
+#### Features
+
+Starts with `features`.
+
+| Field | Description                                                  |
+| ----- | ------------------------------------------------------------ |
+| id    | The identifier of the feature.                               |
+| name  | The name of the feature.                                     |
+| type  | The type of the feature. Can be either BINARY or CONSUMABLE. |
+
+#### Packages
+
+Starts with `packages` and the status of the package. This can be `draft` or `published`.
+
+| Field    | Description                                                                                                                                    |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| id       | The identifier of the package.                                                                                                                 |
+| name     | The name of the package.                                                                                                                       |
+| features | The features within the package. Can have an id which corresponds to that in ‘Features’ and a limit if the type of that feature is CONSUMABLE. |
+
+#### Example
+
+```yaml
+version: 1.0.0
+
+# Updated: Fri Oct 14 2022 13:57:25 GMT+0100 (Irish Standard Time)
+
+# PROJECT: testApp123
+
+# FEATURES
+features:
+  - id: messages
+    name: Messages
+    type: BINARY
+  - id: api-calls
+    name: API Calls
+    type: CONSUMABLE
+  - id: Seat
+    name: Seats
+    type: CONSUMABLE
+  - id: 24-hour-support
+    name: 24 Hour Support
+    type: BINARY
+  - id: email-messages
+    name: Email Messages
+    type: CONSUMABLE
+  - id: known-email-messages
+    name: Known Email Messages
+    type: CONSUMABLE
+  - id: add-on-packages
+    name: Add-on Packages
+    type: CONSUMABLE
+
+# PACKAGES
+packages:
+  draft:
+    - id: premium
+      name: Add-on
+      features: []
+    - id: extra-messages-500
+      name: 500 Extra Messages
+      features:
+        - id: api-calls
+          limit: 500
+    - id: addon
+      name: Base
+      features:
+        - id: api-calls
+          limit: 200
+    - id: pro
+      name: Pro
+      features:
+        - id: api-calls
+          limit: 50
+  published:
+    - id: free
+      name: Free
+      features:
+        - id: api-calls
+          limit: 50
+    - id: identifier
+      name: Basic
+      features:
+        - id: messages
+        - id: api-calls
+          limit: 1000
+    - id: pro-package
+      name: Pro
+      features:
+        - id: Seat
+          limit: 10
+        - id: email-messages
+          limit: 5
+```
+
+### 2. Validate the changes
+
+We strongly recommend checking whether your configuration is correctly structured or if you have introduced any breaking changes with your changes. To do so, run the following command:
+
+```bash
+kana validate
+```
+
+### 3. Publish the changes
+
+When you are ready, you will need to publish your updated `kana.yaml` file to production by running the following command:
+
+```bash
+kana publish
+```

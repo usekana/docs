@@ -30,7 +30,9 @@ This should show once the destination has been added:
 
 The following URL should be added to the _Webhook URL_ section:
 
+```url
 https://bletchley.onrender.com/segment/events
+```
 
 ![](https://3885410404-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvWMuQ5MTaMqVa4wiFp1u%2Fuploads%2FTSUQ3orDrfhz3WQ6xRkC%2FScreenshot%202022-09-12%20at%2018.32.03.png?alt=media&token=958d5380-b3d1-45e9-8c13-b04a4578c603)
 
@@ -61,10 +63,18 @@ We strongly recommend either sending in identify events for users or importing u
 
 </Tip>
 
-[Identify Users (Segment)](/non-technical/integrations/segment-integration/identify-users-segment)
+<Card
+  title="Identify Users (Segment)"
+  icon={solid("id-badge")}
+  href="/non-technical/integrations/segment-integration/identify-users-segment"
+/>
 
 ### Tracking feature usage
 
 Kana can track the usage of features by users based on incoming [track](https://segment.com/docs/connections/spec/track/) events from Segment. This will reduce the complexity of having to integrate with Kana directly when getting started, allowing you to either specify the `featureId` and `delta` in Segment event properties or set no-code rules to associate events to features by.
 
-[Track Feature Usage (Segment)](/non-technical/integrations/segment-integration/track-feature-usage-segment)
+<Card
+  title="Track Feature Usage (Segment)"
+  icon={solid("train-track")}
+  href="/non-technical/integrations/segment-integration/track-feature-usage-segment"
+/>

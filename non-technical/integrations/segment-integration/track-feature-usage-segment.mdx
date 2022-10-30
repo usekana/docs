@@ -54,11 +54,15 @@ Kana will look at incoming events and process them alongside the rules you have 
 
 These rules can be created on the [Segment Integration page](https://dashboard.usekana.com/integrations/segment/rules) within the [Kana dashboard](https://dashboard.usekana.com/). They can be set based on the name and properties of a track event with multiple `AND` conditions if required.
 
+<Card
+  title="Create new mapping rules"
+  icon={solid("ruler")}
+  href="/non-technical/integrations/segment-integration/track-feature-usage-segment/create-new-mapping-rules"
+/>
+
 <Note>
 **How do I reprocess events which didn't previously match any features?**
 
 Any rules created after events have been sent in will retroactively apply to all events which did not match beforehand, meaning they will be reprocessed against these new rules in an attempt to map them to features. Feature usage will then be recorded if they match and the event will not be reprocessed again.
 
 </Note>
-
-**Link to create rules**
